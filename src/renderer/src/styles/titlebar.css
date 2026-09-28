@@ -1,0 +1,176 @@
+.titlebar {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--chrome);
+  -webkit-app-region: drag;
+  position: relative;
+  z-index: 20;
+}
+
+.platform-darwin .titlebar {
+  padding-left: 84px;
+}
+
+.platform-win32 .titlebar,
+.platform-linux .titlebar {
+  padding-right: 148px;
+}
+
+.titlebar button,
+.titlebar [role='tab'] {
+  -webkit-app-region: no-drag;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-name {
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  font-size: 14px;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tab {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.tab span.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab:hover {
+  color: var(--fg);
+}
+
+.tab[aria-selected='true'] {
+  border-color: var(--line);
+  background: var(--panel2);
+  color: var(--fg);
+}
+
+.tab .dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.tab .close {
+  display: none;
+  width: 16px;
+  height: 16px;
+  margin-right: -6px;
+  border-radius: 4px;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+.tab:hover .close {
+  display: flex;
+}
+.tab .close:hover {
+  background: var(--line);
+  color: var(--fg);
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover {
+  color: var(--fg);
+  background: var(--panel2);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.segmented {
+  display: flex;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  gap: 2px;
+}
+
+.segmented button {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.segmented button.mono {
+  letter-spacing: 0;
+  font-weight: 700;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.square-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--fg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.square-btn:hover,
+.square-btn[aria-expanded='true'] {
+  border-color: var(--accent);
+}

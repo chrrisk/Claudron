@@ -1,0 +1,105 @@
+import type { Project } from '@shared/settings'
+import { useSettings } from '../store/settings'
+import { CloseIcon, GearIcon, LogoMark, MoonIcon, PlusIcon, SunriseIcon } from './icons'
+
+interface Props {
+  settingsOpen: boolean
+  onToggleSettings: () => void
+  rightSlot?: React.ReactNode
+}
+
+export function TitleBar({ settingsOpen, onToggleSettings, rightSlot }: Props): React.JSX.Element {
+  const settings = useSettings((s) => s.settings)
+  const update = useSettings((s) => s.update)
+  const isDark = settings.theme === 'dark'
+  const isUi = settings.mode === 'ui'
+
+  const openProject = async (): Promise<void> => {
+    const project = await window.wraith.invoke('projects:pick')
+    if (!project) return
+    const existing = settings.projects.find((p) => p.path === project.path)
+    if (existing) {
+      update({ activeProjectId: existing.id })
+      return
+    }
+    update({ projects: [...settings.projects, project], activeProjectId: project.id })
+  }
+
+  const closeProject = (p: Project): void => {
+    const projects = settings.projects.filter((x) => x.id !== p.id)
+    const activeProjectId =
+      settings.activeProjectId === p.id ? (projects[projects.length - 1]?.id ?? null) : settings.activeProjectId
+    update({ projects, activeProjectId })
+  }
+
+  return (
+    <header className="titlebar">
+      <div className="brand">
+        <LogoMark />
+        <span className="brand-name">WRAITH</span>
+      </div>
+
+      <div className="tabs" role="tablist" aria-label="Projects">
+        {settings.projects.map((p) => {
+          const active = p.id === settings.activeProjectId
+          return (
+            <div
+              key={p.id}
+              role="tab"
+              tabIndex={0}
+              aria-selected={active}
+              title={p.path}
+              className="tab"
+              onClick={() => update({ activeProjectId: p.id })}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && update({ activeProjectId: p.id })}
+              onAuxClick={(e) => e.button === 1 && closeProject(p)}
+            >
+              {active && <span className="dot" />}
+              <span className="label">{p.name}</span>
+              <span
+                className="close"
+                role="button"
+                aria-label={`Close ${p.name}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  closeProject(p)
+                }}
+              >
+                <CloseIcon />
+              </span>
+            </div>
+          )
+        })}
+        <button className="icon-btn" aria-label="Open project" title="Open project folder" onClick={openProject}>
+          <PlusIcon />
+        </button>
+      </div>
+
+      <div className="spacer" />
+
+      {rightSlot}
+
+      <div className="segmented" role="group" aria-label="Interface style">
+        <button aria-pressed={isUi} onClick={() => update({ mode: 'ui' })}>
+          UI
+        </button>
+        <button className="mono" aria-pressed={!isUi} onClick={() => update({ mode: 'cli' })}>
+          &gt;_ CLI
+        </button>
+      </div>
+
+      <button
+        className="square-btn"
+        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        onClick={() => update({ theme: isDark ? 'light' : 'dark' })}
+      >
+        {isDark ? <MoonIcon /> : <SunriseIcon />}
+      </button>
+
+      <button className="square-btn" aria-label="Settings" aria-expanded={settingsOpen} onClick={onToggleSettings}>
+        <GearIcon />
+      </button>
+    </header>
+  )
+}

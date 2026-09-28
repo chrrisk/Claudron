@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Usage cauldron states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1280px; height: 620px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 32px; background: #0c0a11; color: #ede7f6; font-family: 'Chakra Petch', 'Segoe UI', system-ui, sans-serif">
+  <div style="display: flex; align-items: baseline; gap: 20px">
+    <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: 0.06em">Usage cauldron</h1>
+    <p style="margin: 0; font-size: 15px; color: #9c91b0">Liquid level is the 5-hour session. Mood, color and bubbles change as it fills.</p>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; flex: 1">
+    <sc-for list="{{states}}" as="s" hint-placeholder-count="4">
+      <div style="display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: 14px; border: 1px solid {{s.border}}; background: #14111c">
+        <div style="display: flex; justify-content: space-between; align-items: baseline">
+          <span style="font-size: 13px; font-weight: 700; letter-spacing: 0.18em; color: {{s.color}}">{{s.mood}}</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700">{{s.pctLabel}}</span>
+        </div>
+        <svg width="240" height="160" viewBox="0 0 200 134" role="img" aria-label="{{s.aria}}" style="align-self: center">
+          <defs><clipPath id="{{s.clipId}}"><path d="M28 36Q24 118 100 124Q176 118 172 36z"></path></clipPath></defs>
+          <path d="M28 36Q24 118 100 124Q176 118 172 36z" fill="#07060b"></path>
+          <g clip-path="{{s.clipUrl}}">
+            <rect x="0" y="{{s.liqY}}" width="200" height="140" fill="{{s.color}}" opacity="0.9"></rect>
+            <ellipse cx="100" cy="{{s.liqY}}" rx="80" ry="5" fill="#ffffff" opacity="0.5"></ellipse>
+          </g>
+          <sc-for list="{{s.bubbles}}" as="b" hint-placeholder-count="3">
+            <circle cx="{{b.x}}" cy="{{b.y}}" r="{{b.r}}" fill="none" stroke="{{s.color}}" stroke-width="1.5"></circle>
+          </sc-for>
+          <path d="M28 36Q24 118 100 124Q176 118 172 36" fill="none" stroke="#3d3350" stroke-width="2"></path>
+          <rect x="18" y="30" width="164" height="10" rx="5" fill="#3d3350"></rect>
+          <sc-if value="{{s.over}}" hint-placeholder-val="{{ false }}">
+            <path d="M40 30Q60 22 100 24Q140 22 160 30L160 34Q140 28 100 30Q60 28 40 34z" fill="{{s.color}}"></path>
+            <path d="M22 34q-4 10 0 22q4-6 0-22zM176 34q-4 16 0 30q4-10 0-30zM60 36q-3 8 0 14q3-5 0-14z" fill="{{s.color}}"></path>
+          </sc-if>
+          <path d="M70 124l-6 9M130 124l6 9" stroke="#3d3350" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #c9bfdb">{{s.desc}}</p>
+        <code style="margin-top: auto; padding: 10px 12px; border-radius: 6px; background: #08070c; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #ede7f6; white-space: nowrap">cauldron <span style="color: {{s.color}}">{{s.bar}}</span> {{s.pctLabel}}</code>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":620}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const defs = [
+      { pct: 25, mood: 'CALM', color: '#7ee0a1', desc: 'Under 40%. Still surface, one lazy bubble.' },
+      { pct: 62, mood: 'SIMMERING', color: '#ff8a3d', desc: '40 to 74%. Turns pumpkin orange and starts to bubble.' },
+      { pct: 82, mood: 'BOILING', color: '#ff8a3d', desc: '75 to 91%. Rolling bubbles. Time to wrap up the big tasks.' },
+      { pct: 98, mood: 'BOILING OVER', color: '#ff5370', desc: '92% and up. Spills over the rim in red until the session resets.' }
+    ];
+    const states = defs.map((d, i) => {
+      const liqY = Math.max(30, 122 - 86 * (d.pct / 100));
+      const n = d.pct < 40 ? 1 : d.pct < 75 ? 3 : 5;
+      const spots = [[78, 9, 4], [112, 20, 6], [128, 30, 3], [92, 26, 5], [140, 14, 4]];
+      const bubbles = spots.slice(0, n).map(([x, dy, r]) => ({ x, y: Math.max(4, liqY - dy), r }));
+      const filled = Math.round(d.pct / 10);
+      return {
+        ...d, liqY, bubbles,
+        over: d.pct >= 92,
+        border: d.pct >= 92 ? '#ff5370' : '#2a2338',
+        pctLabel: d.pct + '%',
+        bar: '█'.repeat(filled) + '░'.repeat(10 - filled),
+        clipId: 'pot' + i, clipUrl: 'url(#pot' + i + ')',
+        aria: 'Cauldron ' + d.pct + ' percent full, ' + d.mood.toLowerCase()
+      };
+    });
+    return { states };
+  }
+}
+</script>
+</body>
+</html>

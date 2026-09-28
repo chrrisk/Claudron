@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spotify mini player states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1280px; height: 620px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 32px; background: #0c0a11; color: #ede7f6; font-family: 'Chakra Petch', 'Segoe UI', system-ui, sans-serif">
+  <div style="display: flex; align-items: baseline; gap: 20px">
+    <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: 0.06em">Spotify mini player</h1>
+    <p style="margin: 0; font-size: 15px; color: #9c91b0">Four states, from first launch to CLI mode.</p>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; flex: 1">
+
+    <!-- 1 not connected -->
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.2em; color: #9c91b0">1 · NOT CONNECTED</span>
+      <div style="display: flex; flex-direction: column; gap: 14px; padding: 18px; border-radius: 12px; border: 1px dashed #3d3350; background: #14111c">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9c91b0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        <span style="font-size: 16px; font-weight: 600">Code with a soundtrack</span>
+        <span style="font-size: 13px; line-height: 1.5; color: #9c91b0">Shows what is playing on any of your devices. Play and skip need Spotify Premium.</span>
+        <button style="height: 44px; border-radius: 8px; border: none; background: #ff8a3d; color: #1a0c02; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Connect Spotify</button>
+      </div>
+    </div>
+
+    <!-- 2 playing -->
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.2em; color: #9c91b0">2 · PLAYING</span>
+      <div style="display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px; border: 1px solid #2a2338; background: #1b1726">
+        <div style="display: flex; gap: 12px; align-items: center">
+          <svg width="56" height="56" viewBox="0 0 64 64" role="img" aria-label="Album art placeholder" style="flex: none; border-radius: 6px"><rect width="64" height="64" fill="#1d1530"></rect><circle cx="44" cy="20" r="10" fill="#ff8a3d"></circle><circle cx="48" cy="17" r="9" fill="#1d1530"></circle><path d="M0 64V46l8-6 6 8 8-14 8 10 8-6 8 8 8-12 10 14v16z" fill="#b79cff" opacity="0.8"></path></svg>
+          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">[Track title]</span><span style="font-size: 13px; color: #9c91b0">[Artist]</span></div>
+        </div>
+        <div style="height: 4px; border-radius: 2px; background: #2a2338; overflow: hidden"><div style="width: 43%; height: 100%; background: #ff8a3d"></div></div>
+        <div style="display: flex; justify-content: center; gap: 12px">
+          <button aria-label="Previous track" style="width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #ede7f6; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"></path></svg></button>
+          <button aria-label="Pause" style="width: 44px; height: 44px; border-radius: 50%; border: none; background: #ff8a3d; color: #1a0c02; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg></button>
+          <button aria-label="Next track" style="width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #ede7f6; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"></path></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 ducked -->
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.2em; color: #9c91b0">3 · CLAUDE NEEDS YOU <span style="color: #ff8a3d">(IDEA)</span></span>
+      <div style="display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px; border: 1px solid #ff8a3d; background: #1b1726; box-shadow: 0 0 24px rgba(255,138,61,0.28)">
+        <div style="display: flex; gap: 12px; align-items: center; opacity: 0.55">
+          <svg width="56" height="56" viewBox="0 0 64 64" aria-hidden="true" style="flex: none; border-radius: 6px"><rect width="64" height="64" fill="#1d1530"></rect><circle cx="44" cy="20" r="10" fill="#ff8a3d"></circle><circle cx="48" cy="17" r="9" fill="#1d1530"></circle><path d="M0 64V46l8-6 6 8 8-14 8 10 8-6 8 8 8-12 10 14v16z" fill="#b79cff" opacity="0.8"></path></svg>
+          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">[Track title]</span><span style="font-size: 13px; color: #9c91b0">volume lowered</span></div>
+        </div>
+        <span style="font-size: 13px; line-height: 1.5">Music dips to 30% while a permission prompt is waiting, then comes back when you answer.</span>
+      </div>
+    </div>
+
+    <!-- 4 compact + cli -->
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.2em; color: #9c91b0">4 · COMPACT / CLI</span>
+      <button style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px 0 6px; border-radius: 22px; border: 1px solid #2a2338; background: #1b1726; color: #ede7f6; font: inherit; font-size: 13px; cursor: pointer">
+        <svg width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" style="border-radius: 50%"><rect width="64" height="64" fill="#1d1530"></rect><circle cx="44" cy="20" r="10" fill="#ff8a3d"></circle><path d="M0 64V46l8-6 6 8 8-14 8 10 8-6 8 8 8-12 10 14v16z" fill="#b79cff"></path></svg>
+        [Track title]<span style="color: #7ee0a1; font-family: 'JetBrains Mono', monospace">▶</span>
+      </button>
+      <span style="font-size: 13px; color: #9c91b0; line-height: 1.5">Pill for the title bar when the right rail is hidden.</span>
+      <code style="padding: 10px 12px; border-radius: 6px; background: #08070c; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #ede7f6; white-space: nowrap; overflow: hidden"><span style="color: #7ee0a1">▶</span> [Track title] · [Artist] <span style="color: #9c91b0">1:42/3:58</span></code>
+      <span style="font-size: 13px; color: #9c91b0; line-height: 1.5">Status-line segment in CLI mode. Click it or press ctrl+space to play/pause.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":620}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

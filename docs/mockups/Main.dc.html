@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wraith app window</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<style>
+body{margin:0}
+@font-face{font-family:'Excalifont';src:url(/_blob/e07f1a516b307419027b577590140c9d) format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@keyframes wraithFog{0%{transform:translateX(-4%)}50%{transform:translateX(4%)}100%{transform:translateX(-4%)}}
+@keyframes wraithFlicker{0%,100%{opacity:1}12%{opacity:.7}20%{opacity:.95}34%{opacity:.55}48%{opacity:1}63%{opacity:.78}80%{opacity:.92}}
+@keyframes wraithBat{0%,100%{transform:translate(0,0) scaleY(1)}25%{transform:translate(-18px,-8px) scaleY(.7)}50%{transform:translate(-36px,-2px) scaleY(1)}75%{transform:translate(-18px,6px) scaleY(.7)}}
+@keyframes wraithGlitch{0%,90%,100%{transform:none}92%{transform:translate(3px,-1px)}94%{transform:translate(-3px,1px)}96%{transform:translate(2px,0)}98%{transform:translate(-1px,1px)}}
+@keyframes wraithCursor{0%,100%{opacity:1}40%{opacity:.5}60%{opacity:.9}75%{opacity:.65}}
+@keyframes wraithFlyby{0%{transform:translate(-80px,0)}3%{transform:translate(220px,10px)}6%{transform:translate(520px,-4px)}9%{transform:translate(820px,9px)}12%{transform:translate(1120px,0)}13%,100%{transform:translate(1400px,0)}}
+@keyframes wraithFlap{from{transform:scaleY(1)}to{transform:scaleY(0.45)}}
+@media (prefers-reduced-motion: reduce){[data-anim]{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.fg}}; font-family: {{uiFont}}; overflow: hidden; position: relative">
+
+  <!-- Title bar -->
+  <div style="height: 48px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 12px 0 16px; border-bottom: 1px solid {{t.line}}; background: {{t.chrome}}">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l8.66 5v10L12 22l-8.66-5V7z" stroke="{{t.accent}}" stroke-width="1.6"></path><path d="M7.5 10.5l3 1.5-3 1z" fill="{{t.accent}}"></path><path d="M16.5 10.5l-3 1.5 3 1z" fill="{{t.accent}}"></path><path d="M8.5 16q3.5 2 7 0" stroke="{{t.accent}}" stroke-width="1.4" stroke-linecap="round"></path></svg>
+      <span style="font-weight: 700; letter-spacing: 0.28em; font-size: 14px">WRAITH</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 4px; margin-left: 8px">
+      <button style="height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid {{t.line}}; background: {{t.panel2}}; color: {{t.fg}}; font: inherit; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{t.accent}}; box-shadow: 0 0 8px {{t.accent}}"></span>game-hub</button>
+      <button style="height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: {{t.muted}}; font: inherit; font-size: 13px; cursor: pointer">isles-plus</button>
+      <button aria-label="New tab" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: {{t.muted}}; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></button>
+    </div>
+    <div style="flex: 1"></div>
+    <sc-if value="{{spotifyPill}}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{togglePlay}}" aria-label="{{playLabel}}" style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 14px 0 4px; border-radius: 18px; border: 1px solid {{t.line}}; background: {{t.panel}}; color: {{t.fg}}; font: inherit; font-size: 13px; cursor: pointer">
+        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true" style="border-radius: 50%"><rect width="64" height="64" fill="{{t.art}}"></rect><circle cx="44" cy="20" r="10" fill="{{t.accent}}"></circle><path d="M0 64V46l8-6 6 8 8-14 8 10 8-6 8 8 8-12 10 14v16z" fill="{{t.violet}}"></path></svg>
+        [Track title]<span style="color: {{t.ok}}; font-family: 'JetBrains Mono', monospace">{{playGlyph}}</span>
+      </button>
+    </sc-if>
+    <div role="group" aria-label="Interface style" style="display: flex; padding: 3px; border-radius: 8px; border: 1px solid {{t.line}}; background: {{t.panel}}; gap: 2px">
+      <button aria-pressed="{{isUi}}" onClick="{{setUi}}" style="height: 30px; padding: 0 14px; border-radius: 6px; border: none; background: {{uiBtnBg}}; color: {{uiBtnFg}}; font: inherit; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; cursor: pointer">UI</button>
+      <button aria-pressed="{{isCli}}" onClick="{{setCli}}" style="height: 30px; padding: 0 14px; border-radius: 6px; border: none; background: {{cliBtnBg}}; color: {{cliBtnFg}}; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; cursor: pointer">&gt;_ CLI</button>
+    </div>
+    <button aria-label="{{themeLabel}}" onClick="{{toggleTheme}}" style="width: 38px; height: 38px; border-radius: 8px; border: 1px solid {{t.line}}; background: {{t.panel}}; color: {{t.fg}}; cursor: pointer; display: flex; align-items: center; justify-content: center">
+      <sc-if value="{{isDark}}" hint-placeholder-val="{{ true }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="{{t.moon}}"></circle><circle cx="9" cy="10" r="1.8" fill="{{t.moonCrater}}"></circle><circle cx="14.5" cy="14.5" r="2.4" fill="{{t.moonCrater}}"></circle><circle cx="15" cy="8.5" r="1" fill="{{t.moonCrater}}"></circle></svg>
+      </sc-if>
+      <sc-if value="{{isLight}}" hint-placeholder-val="{{ false }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 18h20"></path><path d="M7 18a5 5 0 0 1 10 0"></path><path d="M12 6v3M5.6 10.6l1.4 1.4M18.4 10.6L17 12M2 14h2M20 14h2"></path></svg>
+      </sc-if>
+    </button>
+    <button aria-label="Settings" aria-expanded="{{settingsOpen}}" onClick="{{toggleSettings}}" style="width: 38px; height: 38px; border-radius: 8px; border: 1px solid {{settingsBorder}}; background: {{t.panel}}; color: {{t.fg}}; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg></button>
+  </div>
+
+  <!-- Settings popover -->
+  <sc-if value="{{settingsOpen}}" hint-placeholder-val="{{ false }}">
+  <div style="position: absolute; top: 56px; right: 12px; z-index: 30; width: 320px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; padding: 18px; border-radius: 12px; border: 1px solid {{t.lineStrong}}; background: {{t.panel}}; box-shadow: 0 18px 48px rgba(0,0,0,0.45)">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.22em; color: {{t.muted}}">HAUNT LEVEL</span>
+      <div role="group" aria-label="Haunt level" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 3px; border-radius: 8px; border: 1px solid {{t.line}}; background: {{t.bg}}">
+        <sc-for list="{{hauntOpts}}" as="o" hint-placeholder-count="3">
+          <button aria-pressed="{{o.on}}" onClick="{{o.pick}}" style="height: 44px; border-radius: 6px; border: none; background: {{o.bg}}; color: {{o.fg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; line-height: 1.1">{{o.label}}</button>
+        </sc-for>
+      </div>
+      <span style="font-size: 12px; line-height: 1.45; color: {{t.muted}}">{{hauntHint}}</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.22em; color: {{t.muted}}">SOUND EFFECTS</span>
+      <label style="display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; cursor: pointer"><input type="checkbox" checked="{{doorSound}}" onChange="{{toggleDoor}}" style="width: 18px; height: 18px; accent-color: {{t.accent}}">Creaky door on permission prompts</label>
+      <label style="display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; cursor: pointer"><input type="checkbox" checked="{{bellSound}}" onChange="{{toggleBell}}" style="width: 18px; height: 18px; accent-color: {{t.accent}}">Bell when a task finishes</label>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.22em; color: {{t.muted}}">FONT</span>
+      <div role="group" aria-label="Font" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 3px; border-radius: 8px; border: 1px solid {{t.line}}; background: {{t.bg}}">
+        <sc-for list="{{fontOpts}}" as="o" hint-placeholder-count="2">
+          <button aria-pressed="{{o.on}}" onClick="{{o.pick}}" style="height: 36px; border-radius: 6px; border: none; background: {{o.bg}}; color: {{o.fg}}; font-family: {{o.family}}; font-size: 14px; font-weight: 600; cursor: pointer">{{o.label}}</button>
+        </sc-for>
+      </div>
+      <span style="font-size: 12px; line-height: 1.45; color: {{t.muted}}">Code and the terminal stay monospace so columns line up.</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.22em; color: {{t.muted}}">SPOTIFY PRESENCE</span>
+      <div role="group" aria-label="Spotify presence" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 3px; border-radius: 8px; border: 1px solid {{t.line}}; background: {{t.bg}}">
+        <sc-for list="{{spotifyOpts}}" as="o" hint-placeholder-count="3">
+          <button aria-pressed="{{o.on}}" onClick="{{o.pick}}" style="height: 36px; border-radius: 6px; border: none; background: {{o.bg}}; color: {{o.fg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{o.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ UI MODE ============ -->
+  <sc-if value="{{isUi}}" hint-placeholder-val="{{ true }}">
+  <div style="flex: 1; min-height: 0; display: flex">
+
+    <!-- Sidebar -->
+    <div style="width: 232px; flex: none; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; padding: 20px 14px; border-right: 1px solid {{t.line}}; background: {{t.panel}}">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.22em; color: {{t.muted}}; padding: 0 8px 6px">SESSIONS</div>
+        <a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 10px 10px; border-radius: 8px; background: {{t.panel2}}; border: 1px solid {{t.line}}; color: {{t.fg}}; text-decoration: none">
+          <span style="font-size: 14px; font-weight: 500">Daily streak counter</span>
+          <span style="font-size: 12px; color: {{t.accent}}; font-family: 'JetBrains Mono', monospace">{{runLabel}}</span>
+        </a>
+        <sc-for list="{{oldSessions}}" as="o" hint-placeholder-count="2">
+          <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 10px 10px; border-radius: 8px; color: {{t.fg}}; text-decoration: none">
+            <sc-if value="{{spooky}}" hint-placeholder-val="{{ true }}">
+              <svg width="18" height="22" viewBox="0 0 18 22" aria-hidden="true" style="flex: none"><path d="M2 21V8a7 7 0 0 1 14 0v13z" fill="none" stroke="{{t.muted}}" stroke-width="1.5"></path><path d="M9 6v7M6 9h6" stroke="{{t.muted}}" stroke-width="1.5" stroke-linecap="round"></path><path d="M0 21h18" stroke="{{t.muted}}" stroke-width="1.5"></path></svg>
+            </sc-if>
+            <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+              <span style="font-size: 14px">{{o.title}}</span>
+              <span style="font-size: 12px; color: {{t.muted}}">{{o.meta}}</span>
+            </span>
+          </a>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.22em; color: {{t.muted}}; padding: 0 8px 6px">RUNNER</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: {{t.ok}}"></span>claude
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: {{t.muted}}">
+          <span style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid {{t.muted}}; box-sizing: border-box"></span>any command<span style="margin-left: auto; font-family: {{uiFont}}; font-size: 10px; letter-spacing: 0.16em; padding: 2px 6px; border-radius: 4px; border: 1px solid {{t.line}}">SOON</span>
+        </div>
+      </div>
+      <div style="flex: 1"></div>
+      <button style="height: 44px; border-radius: 8px; border: 1px dashed {{t.accent}}; background: transparent; color: {{t.accent}}; font: inherit; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>{{newLabel}}</button>
+    </div>
+
+    <!-- Center: conversation -->
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative; overflow: hidden; background-color: {{t.bg}}; background-image: linear-gradient({{t.grid}} 1px, transparent 1px), linear-gradient(90deg, {{t.grid}} 1px, transparent 1px); background-size: 32px 32px">
+
+      <!-- cobweb, grows with idle time -->
+      <svg width="150" height="150" viewBox="0 0 150 150" fill="none" aria-hidden="true" style="position: absolute; top: 0; right: 0; z-index: 0; opacity: 0.55; pointer-events: none; transform: scale({{webScale}}); transform-origin: top right"><g stroke="{{t.web}}" stroke-width="1"><path d="M150 0L20 0M150 0L40 70M150 0L90 120M150 0L150 140"></path><path d="M120 0Q118 18 136 22Q146 24 150 28"></path><path d="M88 0Q86 32 112 42Q136 50 150 58"></path><path d="M56 0Q56 48 90 64Q122 80 150 90"></path><path d="M28 0Q30 62 70 90Q108 112 150 120"></path></g><path d="M101 42v24" stroke="{{t.web}}"></path><circle cx="101" cy="70" r="4" fill="{{t.web}}"></circle></svg>
+
+      <!-- fog -->
+      <sc-if value="{{spooky}}" hint-placeholder-val="{{ true }}">
+        <div data-anim="fog" aria-hidden="true" style="position: absolute; left: -10%; width: 120%; bottom: 0; height: 220px; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 38% 55% at 22% 85%, {{t.fog}}, transparent 70%), radial-gradient(ellipse 42% 50% at 70% 95%, {{t.fog}}, transparent 70%), radial-gradient(ellipse 30% 40% at 48% 100%, {{t.fog}}, transparent 70%); animation: wraithFog 18s ease-in-out infinite"></div>
+      </sc-if>
+
+      <!-- context strip -->
+      <div style="height: 44px; flex: none; position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; padding: 0 24px; border-bottom: 1px solid {{t.line}}; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: {{t.muted}}">
+        <span style="color: {{t.fg}}">~/code/game-hub</span>
+        <span style="padding: 3px 8px; border-radius: 4px; border: 1px solid {{t.line}}">main</span>
+        <span style="padding: 3px 8px; border-radius: 4px; border: 1px solid {{t.line}}">opus</span>
+        <div style="flex: 1"></div>
+        <span>ctx</span>
+        <div style="width: 90px; height: 6px; border-radius: 3px; background: {{t.panel2}}; overflow: hidden"><div style="width: 41%; height: 100%; background: {{t.violet}}"></div></div>
+        <span style="color: {{t.fg}}">41%</span>
+      </div>
+
+      <!-- messages -->
+      <div style="flex: 1; min-height: 0; position: relative; z-index: 1; overflow: hidden; display: flex; flex-direction: column; gap: 16px; padding: 24px 32px">
+        <div style="align-self: flex-end; max-width: 520px; padding: 12px 16px; border-radius: 12px 12px 2px 12px; background: {{t.userBubble}}; color: {{t.fg}}; font-size: 15px; line-height: 1.5; border: 1px solid {{t.line}}">Add a daily streak counter to the results screen and save it in localStorage.</div>
+
+        <div style="display: flex; gap: 12px; align-items: flex-start">
+          <div style="width: 28px; height: 28px; flex: none; border-radius: 6px; background: {{t.accentSoft}}; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l8.66 5v10L12 22l-8.66-5V7z" stroke="{{t.accent}}" stroke-width="2"></path></svg></div>
+          <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0">
+            <div style="font-size: 15px; line-height: 1.55; padding-top: 3px">I'll check how the results screen renders first, then add the streak logic in its own module.</div>
+
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1px solid {{t.line}}; background: {{t.panel}}; font-family: 'JetBrains Mono', monospace; font-size: 13px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{t.violet}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+              <span style="color: {{t.violet}}; font-weight: 700">Read</span><span>src/screens/Results.tsx</span><span style="margin-left: auto; color: {{t.muted}}">142 lines</span>
+            </div>
+
+            <div style="border-radius: 8px; border: 1px solid {{t.line}}; background: {{t.panel}}; overflow: hidden; font-family: 'JetBrains Mono', monospace; font-size: 13px">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid {{t.line}}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{t.accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+                <span style="color: {{t.accent}}; font-weight: 700">Edit</span><span>src/lib/streak.ts</span><span style="margin-left: auto; color: {{t.ok}}">+3</span><span style="color: {{t.bad}}">-1</span>
+              </div>
+              <div style="display: flex; flex-direction: column; padding: 8px 0; line-height: 1.7">
+                <div style="padding: 0 14px; color: {{t.muted}}">  12  export function getStreak() {</div>
+                <div style="padding: 0 14px; background: {{t.badSoft}}; color: {{t.bad}}">- 13    return 0;</div>
+                <div style="padding: 0 14px; background: {{t.okSoft}}; color: {{t.ok}}">+ 13    const last = localStorage.getItem('lastPlayed');</div>
+                <div style="padding: 0 14px; background: {{t.okSoft}}; color: {{t.ok}}">+ 14    if (!last) return 0;</div>
+                <div style="padding: 0 14px; background: {{t.okSoft}}; color: {{t.ok}}">+ 15    return Number(localStorage.getItem('streak') ?? 0);</div>
+              </div>
+            </div>
+
+            <!-- permission: vampire rules -->
+            <div style="position: relative; display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border-radius: 10px; border: 1px solid {{t.accent}}; background: {{t.accentSoft}}">
+              <div data-anim="flicker" aria-hidden="true" style="position: absolute; inset: 0; border-radius: 10px; box-shadow: 0 0 28px {{t.glow}}; pointer-events: none; animation: {{flicker}}"></div>
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 14px">
+                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: {{t.accent}}">{{permTag}}</span>
+                <span>{{permLead}}</span>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 2px 8px; border-radius: 4px; background: {{t.panel}}">npm test -- streak</code>
+              </div>
+              <div style="display: flex; gap: 8px">
+                <button style="height: 36px; padding: 0 16px; border-radius: 6px; border: none; background: {{t.accent}}; color: {{t.accentInk}}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{allowOnce}} <span style="opacity: 0.7; font-family: 'JetBrains Mono', monospace; font-size: 12px">1</span></button>
+                <button style="height: 36px; padding: 0 16px; border-radius: 6px; border: 1px solid {{t.line}}; background: {{t.panel}}; color: {{t.fg}}; font: inherit; font-size: 14px; cursor: pointer">{{allowAlways}} <span style="color: {{t.muted}}; font-family: 'JetBrains Mono', monospace; font-size: 12px">2</span></button>
+                <button style="height: 36px; padding: 0 16px; border-radius: 6px; border: 1px solid {{t.line}}; background: transparent; color: {{t.fg}}; font: inherit; font-size: 14px; cursor: pointer">{{deny}} <span style="color: {{t.muted}}; font-family: 'JetBrains Mono', monospace; font-size: 12px">3</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bats + task-done toast (full haunt) -->
+      <sc-if value="{{full}}" hint-placeholder-val="{{ false }}">
+        <div style="position: absolute; left: 32px; bottom: 150px; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1px solid {{t.lineStrong}}; background: {{t.panel}}; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.35)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+          <span><b style="font-weight: 600">Fix flaky CI test</b> finished in 4m 12s</span>
+        </div>
+        <svg data-anim="bat" width="34" height="17" viewBox="0 0 24 12" aria-hidden="true" style="position: absolute; left: 330px; bottom: 196px; z-index: 2; animation: wraithBat 2.8s ease-in-out infinite"><path d="M12 4L12.8 2.2 13.4 4.2Q16 3 18 1Q19 4 24 4Q21 5 21 8Q19 6.5 17 8Q15 6.5 13.5 9L12 11 10.5 9Q9 6.5 7 8Q5 6.5 3 8Q3 5 0 4Q5 4 6 1Q8 3 10.6 4.2L11.2 2.2z" fill="{{t.bat}}"></path></svg>
+        <svg data-anim="bat" width="24" height="12" viewBox="0 0 24 12" aria-hidden="true" style="position: absolute; left: 380px; bottom: 222px; z-index: 2; animation: wraithBat 2.2s ease-in-out infinite 0.4s"><path d="M12 4L12.8 2.2 13.4 4.2Q16 3 18 1Q19 4 24 4Q21 5 21 8Q19 6.5 17 8Q15 6.5 13.5 9L12 11 10.5 9Q9 6.5 7 8Q5 6.5 3 8Q3 5 0 4Q5 4 6 1Q8 3 10.6 4.2L11.2 2.2z" fill="{{t.bat}}"></path></svg>
+        <svg data-anim="bat" width="18" height="9" viewBox="0 0 24 12" aria-hidden="true" style="position: absolute; left: 300px; bottom: 236px; z-index: 2; opacity: 0.7; animation: wraithBat 2.5s ease-in-out infinite 0.9s"><path d="M12 4L12.8 2.2 13.4 4.2Q16 3 18 1Q19 4 24 4Q21 5 21 8Q19 6.5 17 8Q15 6.5 13.5 9L12 11 10.5 9Q9 6.5 7 8Q5 6.5 3 8Q3 5 0 4Q5 4 6 1Q8 3 10.6 4.2L11.2 2.2z" fill="{{t.bat}}"></path></svg>
+      </sc-if>
+
+      <!-- composer -->
+      <div style="flex: none; position: relative; z-index: 1; padding: 0 32px 20px; display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; align-items: flex-end; gap: 10px; padding: 12px 12px 12px 16px; border-radius: 12px; border: 1px solid {{t.lineStrong}}; background: {{t.panel}}">
+          <label style="flex: 1; display: flex; flex-direction: column; gap: 10px">
+            <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Message Claude</span>
+            <textarea rows="2" placeholder="{{placeholder}}" style="resize: none; border: none; outline: none; background: transparent; color: {{t.fg}}; font: inherit; font-size: 15px; line-height: 1.5"></textarea>
+            <span style="display: flex; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: {{t.muted}}">
+              <span style="padding: 2px 8px; border-radius: 4px; border: 1px solid {{t.line}}">/ commands</span>
+              <span style="padding: 2px 8px; border-radius: 4px; border: 1px solid {{t.line}}">@ files</span>
+              <span style="padding: 2px 8px; border-radius: 4px; border: 1px solid {{t.line}}">shift+tab plan</span>
+            </span>
+          </label>
+          <button aria-label="Send" style="width: 44px; height: 44px; flex: none; border-radius: 10px; border: none; background: {{t.accent}}; color: {{t.accentInk}}; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right rail -->
+    <div style="width: 300px; flex: none; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; padding: 20px 16px; border-left: 1px solid {{t.line}}; background: {{t.panel}}">
+
+      <!-- Spotify card -->
+      <sc-if value="{{spotifyCard}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px; border: 1px solid {{t.line}}; background: {{t.panel2}}">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 600; letter-spacing: 0.22em; color: {{t.muted}}"><span>NOW PLAYING</span><span style="color: {{t.ok}}; letter-spacing: 0.08em">Spotify</span></div>
+        <div style="display: flex; gap: 12px; align-items: center">
+          <svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Album art placeholder" style="flex: none; border-radius: 6px"><rect width="64" height="64" fill="{{t.art}}"></rect><circle cx="44" cy="20" r="10" fill="{{t.accent}}"></circle><circle cx="48" cy="17" r="9" fill="{{t.art}}"></circle><path d="M0 64V46l8-6 6 8 8-14 8 10 8-6 8 8 8-12 10 14v16z" fill="{{t.violet}}" opacity="0.8"></path></svg>
+          <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+            <span style="font-size: 15px; font-weight: 600">[Track title]</span>
+            <span style="font-size: 13px; color: {{t.muted}}">[Artist]</span>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <div style="height: 4px; border-radius: 2px; background: {{t.line}}; overflow: hidden"><div style="width: 43%; height: 100%; background: {{t.accent}}"></div></div>
+          <div style="display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {{t.muted}}"><span>1:42</span><span>3:58</span></div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px">
+          <button aria-label="Previous track" style="width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: {{t.fg}}; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"></path></svg></button>
+          <button aria-label="{{playLabel}}" onClick="{{togglePlay}}" style="position: relative; width: 48px; height: 48px; border-radius: 50%; border: none; background: {{t.accent}}; color: {{t.accentInk}}; cursor: pointer; display: flex; align-items: center; justify-content: center">
+            <span data-anim="flicker" aria-hidden="true" style="position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 18px {{t.glow}}; pointer-events: none; animation: {{flicker}}"></span>
+            <sc-if value="{{playing}}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg></sc-if>
+            <sc-if value="{{paused}}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"></path></svg></sc-if>
+          </button>
+          <button aria-label="Next track" style="width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: {{t.fg}}; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"></path></svg></button>
+        </div>
+        <sc-if value="{{spooky}}" hint-placeholder-val="{{ true }}">
+          <button style="height: 36px; border-radius: 8px; border: 1px solid {{t.line}}; background: transparent; color: {{t.violet}}; font: inherit; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V10a7 7 0 0 1 14 0v11l-2.3-2-2.4 2-2.3-2-2.3 2-2.4-2z"></path><circle cx="9.5" cy="10" r="1" fill="currentColor"></circle><circle cx="14.5" cy="10" r="1" fill="currentColor"></circle></svg>Summon a spooky playlist</button>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- Usage cauldron -->
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px; border: 1px solid {{t.line}}; background: {{t.panel2}}">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 600; letter-spacing: 0.22em; color: {{t.muted}}"><span>USAGE CAULDRON</span><span style="color: {{moodColor}}; letter-spacing: 0.12em">{{mood}}</span></div>
+        <svg width="236" height="150" viewBox="0 0 200 128" role="img" aria-label="{{cauldronLabel}}" style="align-self: center">
+          <defs><clipPath id="potClip"><path d="M28 30Q24 112 100 118Q176 112 172 30z"></path></clipPath></defs>
+          <path d="M28 30Q24 112 100 118Q176 112 172 30z" fill="{{t.pot}}"></path>
+          <g clip-path="url(#potClip)">
+            <rect x="0" y="{{liqY}}" width="200" height="140" fill="{{moodColor}}" opacity="0.9"></rect>
+            <ellipse cx="100" cy="{{liqY}}" rx="80" ry="5" fill="{{t.liquidTop}}" opacity="0.55"></ellipse>
+          </g>
+          <circle cx="78" cy="{{b1}}" r="4" fill="none" stroke="{{moodColor}}" stroke-width="1.5"></circle>
+          <circle cx="112" cy="{{b2}}" r="6" fill="none" stroke="{{moodColor}}" stroke-width="1.5"></circle>
+          <circle cx="128" cy="{{b3}}" r="3" fill="none" stroke="{{moodColor}}" stroke-width="1.5"></circle>
+          <path d="M28 30Q24 112 100 118Q176 112 172 30" fill="none" stroke="{{t.potEdge}}" stroke-width="2"></path>
+          <rect x="18" y="24" width="164" height="10" rx="5" fill="{{t.potEdge}}"></rect>
+          <path d="M70 118l-6 9M130 118l6 9" stroke="{{t.potEdge}}" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <div style="display: flex; justify-content: space-between; font-size: 13px"><span>5-hour session</span><span style="font-family: 'JetBrains Mono', monospace">{{sessionPct}}%</span></div>
+            <div style="height: 6px; border-radius: 3px; background: {{t.line}}; overflow: hidden"><div style="width: {{sessionW}}; height: 100%; background: {{moodColor}}"></div></div>
+            <div style="font-size: 12px; color: {{t.muted}}">resets in [2h 14m]</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <div style="display: flex; justify-content: space-between; font-size: 13px"><span>Weekly</span><span style="font-family: 'JetBrains Mono', monospace">{{weekPct}}%</span></div>
+            <div style="height: 6px; border-radius: 3px; background: {{t.line}}; overflow: hidden"><div style="width: {{weekW}}; height: 100%; background: {{t.violet}}"></div></div>
+            <div style="font-size: 12px; color: {{t.muted}}">resets [Thu 9:00 AM]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ CLI MODE ============ -->
+  <sc-if value="{{isCli}}" hint-placeholder-val="{{ false }}">
+  <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; background: {{t.term}}; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.6">
+    <sc-if value="{{spooky}}" hint-placeholder-val="{{ true }}">
+      <div data-anim="fog" aria-hidden="true" style="position: absolute; left: -10%; width: 120%; bottom: 32px; height: 180px; pointer-events: none; background: radial-gradient(ellipse 38% 55% at 22% 85%, {{t.fog}}, transparent 70%), radial-gradient(ellipse 42% 50% at 70% 95%, {{t.fog}}, transparent 70%); animation: wraithFog 18s ease-in-out infinite"></div>
+    </sc-if>
+    <sc-if value="{{full}}" hint-placeholder-val="{{ false }}">
+      <div aria-hidden="true" style="position: absolute; top: 0; left: 0; right: 0; height: 48px; z-index: 2; overflow: hidden; pointer-events: none">
+        <span data-anim="flyby" style="position: absolute; top: 10px; left: 0; animation: wraithFlyby 22s linear infinite"><span data-anim="flap" style="display: block; animation: wraithFlap 0.2s ease-in-out infinite alternate"><svg width="30" height="15" viewBox="0 0 24 12"><path d="M12 4L12.8 2.2 13.4 4.2Q16 3 18 1Q19 4 24 4Q21 5 21 8Q19 6.5 17 8Q15 6.5 13.5 9L12 11 10.5 9Q9 6.5 7 8Q5 6.5 3 8Q3 5 0 4Q5 4 6 1Q8 3 10.6 4.2L11.2 2.2z" fill="{{t.bat}}"></path></svg></span></span>
+        <span data-anim="flyby" style="position: absolute; top: 24px; left: 0; animation: wraithFlyby 22s linear infinite 0.35s"><span data-anim="flap" style="display: block; animation: wraithFlap 0.17s ease-in-out infinite alternate"><svg width="22" height="11" viewBox="0 0 24 12"><path d="M12 4L12.8 2.2 13.4 4.2Q16 3 18 1Q19 4 24 4Q21 5 21 8Q19 6.5 17 8Q15 6.5 13.5 9L12 11 10.5 9Q9 6.5 7 8Q5 6.5 3 8Q3 5 0 4Q5 4 6 1Q8 3 10.6 4.2L11.2 2.2z" fill="{{t.bat}}"></path></svg></span></span>
+        <span data-anim="flyby" style="position: absolute; top: 4px; left: 0; opacity: 0.7; animation: wraithFlyby 22s linear infinite 0.8s"><span data-anim="flap" style="display: block; animation: wraithFlap 0.22s ease-in-out infinite alternate"><svg width="16" height="8" viewBox="0 0 24 12"><path d="M12 4L12.8 2.2 13.4 4.2Q16 3 18 1Q19 4 24 4Q21 5 21 8Q19 6.5 17 8Q15 6.5 13.5 9L12 11 10.5 9Q9 6.5 7 8Q5 6.5 3 8Q3 5 0 4Q5 4 6 1Q8 3 10.6 4.2L11.2 2.2z" fill="{{t.bat}}"></path></svg></span></span>
+      </div>
+    </sc-if>
+    <div style="flex: 1; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 20px 32px; white-space: pre-wrap">
+      <sc-if value="{{spooky}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; align-items: center; gap: 28px">
+          <div style="white-space: pre; color: {{t.accent}}; line-height: 1.15; font-size: 13px; font-weight: 700">{{pumpkinArt}}</div>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span style="letter-spacing: 0.4em; font-weight: 700; color: {{t.fg}}">W R A I T H</span>
+            <span style="color: {{t.muted}}">claude · ~/code/game-hub · main</span>
+            <sc-if value="{{full}}" hint-placeholder-val="{{ false }}"><span style="color: {{t.violet}}">/\^._.^/\   the bats are out tonight</span></sc-if>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{subtle}}" hint-placeholder-val="{{ false }}">
+        <div style="color: {{t.muted}}">wraith ▸ claude   <span style="color: {{t.fg}}">~/code/game-hub</span>   main</div>
+      </sc-if>
+      <div><span style="color: {{t.accent}}; font-weight: 700">&gt; </span>Add a daily streak counter to the results screen and save it in localStorage.</div>
+      <div><span style="color: {{t.fg}}">● </span>I'll check how the results screen renders first, then add the streak logic in its own module.</div>
+      <div style="display: flex; flex-direction: column"><div><span style="color: {{t.violet}}">● </span><span style="font-weight: 700">Read</span>(src/screens/Results.tsx)</div><div style="color: {{t.muted}}">  └ 142 lines</div></div>
+      <sc-if value="{{full}}" hint-placeholder-val="{{ false }}">
+        <div data-anim="glitch" style="color: {{t.ok}}; text-shadow: 2px 0 rgba(255,60,110,0.55), -2px 0 rgba(60,255,200,0.45); animation: wraithGlitch 4s steps(1) infinite">✗ Something went bump in the night: eslint exited 1, retrying</div>
+      </sc-if>
+      <div style="display: flex; flex-direction: column"><div><span style="color: {{t.accent}}">● </span><span style="font-weight: 700">Update</span>(src/lib/streak.ts)</div><div style="color: {{t.muted}}">  └ +3 -1</div><div style="color: {{t.bad}}">    13 -   return 0;</div><div style="color: {{t.ok}}">    13 +   const last = localStorage.getItem('lastPlayed');</div><div style="color: {{t.ok}}">    14 +   if (!last) return 0;</div></div>
+      <div style="position: relative; display: flex; flex-direction: column; padding: 10px 16px; border: 1px solid {{t.accent}}; border-radius: 4px">
+        <div data-anim="flicker" aria-hidden="true" style="position: absolute; inset: 0; border-radius: 4px; box-shadow: 0 0 20px {{t.glow}}; pointer-events: none; animation: {{flicker}}"></div>
+        <div>{{cliPermLead}} <span style="color: {{t.accent}}">npm test -- streak</span></div>
+        <div><span style="color: {{t.accent}}">❯ 1. {{allowOnce}}</span>   2. {{allowAlways}}   3. {{deny}}</div>
+      </div>
+      <div style="flex: 1"></div>
+      <div style="display: flex; align-items: center; padding: 10px 14px; border: 1px solid {{t.lineStrong}}; border-radius: 4px; background: {{t.term}}"><span style="color: {{t.accent}}; font-weight: 700">&gt; </span><span data-anim="cursor" style="display: inline-block; width: 9px; height: 18px; background: {{t.accent}}; box-shadow: 0 0 10px {{t.glow}}; animation: {{cursorAnim}}"></span></div>
+    </div>
+    <!-- status line -->
+    <div style="height: 32px; flex: none; position: relative; display: flex; align-items: stretch; font-size: 12px; border-top: 1px solid {{t.line}}; background: {{t.chrome}}; white-space: nowrap">
+      <span style="display: flex; align-items: center; padding: 0 14px; background: {{t.accent}}; color: {{t.accentInk}}; font-weight: 700; letter-spacing: 0.1em">WRAITH</span>
+      <span style="display: flex; align-items: center; gap: 8px; padding: 0 14px; border-right: 1px solid {{t.line}}; color: {{t.accent}}">{{spin}} <span style="color: {{t.fg}}">{{verbLower}}</span></span>
+      <span style="display: flex; align-items: center; padding: 0 14px; border-right: 1px solid {{t.line}}">opus</span>
+      <span style="display: flex; align-items: center; padding: 0 14px; border-right: 1px solid {{t.line}}; gap: 8px">ctx <span style="color: {{t.violet}}">41%</span></span>
+      <span style="display: flex; align-items: center; padding: 0 14px; border-right: 1px solid {{t.line}}; gap: 8px">cauldron <span style="color: {{moodColor}}">{{sessionBar}}</span> {{sessionPct}}%</span>
+      <span style="display: flex; align-items: center; padding: 0 14px; border-right: 1px solid {{t.line}}; gap: 8px">wk <span style="color: {{t.violet}}">{{weekPct}}%</span></span>
+      <span style="flex: 1"></span>
+      <sc-if value="{{spotifyOn}}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{togglePlay}}" aria-label="{{playLabel}}" style="display: flex; align-items: center; gap: 8px; padding: 0 14px; border: none; border-left: 1px solid {{t.line}}; background: transparent; color: {{t.fg}}; font: inherit; cursor: pointer"><span style="color: {{t.ok}}">{{playGlyph}}</span>[Track title] · [Artist]<span style="color: {{t.muted}}">1:42/3:58</span></button>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startTheme":{"editor":"enum","options":["dark","light"],"default":"dark"},"startMode":{"editor":"enum","options":["ui","cli"],"default":"ui"},"hauntLevel":{"editor":"enum","options":["subtle","spooky","full"],"default":"full"},"spotifyPresence":{"editor":"enum","options":["off","pill","card"],"default":"card"},"startSettingsOpen":{"editor":"boolean","default":false},"uiFont":{"editor":"enum","options":["chakra","excali"],"default":"chakra"},"sessionPct":{"editor":"range","min":0,"max":100,"step":1,"default":62},"weekPct":{"editor":"range","min":0,"max":100,"step":1,"default":38},"idleMinutes":{"editor":"range","min":0,"max":30,"step":1,"default":12},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this._iv = setInterval(() => {
+      const s = this.state || {};
+      this.setState({ tick: (s.tick || 0) + 1 });
+    }, 700);
+  }
+  componentWillUnmount() {
+    clearInterval(this._iv);
+  }
+  tokens(name) {
+    if (name === 'light') {
+      return {
+        bg: '#efe8dc', chrome: '#e7dfd0', panel: '#f8f3ea', panel2: '#efe7d8', term: '#f6f0e5',
+        line: '#d6cab5', lineStrong: '#b9aa90', fg: '#1d1526', muted: '#5f5468',
+        accent: '#b44700', accentInk: '#fff8f0', accentSoft: 'rgba(180,71,0,0.08)', glow: 'rgba(180,71,0,0.22)',
+        violet: '#5a2fc2', ok: '#1d7344', okSoft: 'rgba(29,115,68,0.08)', bad: '#b3203a', badSoft: 'rgba(179,32,58,0.07)',
+        warn: '#b44700', danger: '#b3203a', calm: '#1d7344',
+        grid: 'rgba(90,47,194,0.05)', web: 'rgba(29,21,38,0.35)', userBubble: '#ece2f8',
+        fog: 'rgba(110,90,130,0.16)', bat: '#1d1526', moon: '#1d1526', moonCrater: '#e7dfd0',
+        art: '#2a1d3d', pot: '#2b2233', potEdge: '#1d1526', liquidTop: '#ffffff'
+      };
+    }
+    return {
+      bg: '#0c0a11', chrome: '#100d16', panel: '#14111c', panel2: '#1b1726', term: '#08070c',
+      line: '#2a2338', lineStrong: '#3d3350', fg: '#ede7f6', muted: '#9c91b0',
+      accent: '#ff8a3d', accentInk: '#1a0c02', accentSoft: 'rgba(255,138,61,0.08)', glow: 'rgba(255,138,61,0.32)',
+      violet: '#b79cff', ok: '#7ee0a1', okSoft: 'rgba(126,224,161,0.07)', bad: '#ff7088', badSoft: 'rgba(255,112,136,0.07)',
+      warn: '#ff8a3d', danger: '#ff5370', calm: '#7ee0a1',
+      grid: 'rgba(183,156,255,0.045)', web: 'rgba(237,231,246,0.22)', userBubble: '#221b30',
+      fog: 'rgba(205,195,235,0.085)', bat: '#cfc4e6', moon: '#f3ead2', moonCrater: '#c9bd9c',
+      art: '#1d1530', pot: '#07060b', potEdge: '#3d3350', liquidTop: '#ffffff'
+    };
+  }
+  renderVals() {
+    const s = this.state || {};
+    const p = this.props;
+    const theme = s.theme || p.startTheme || 'dark';
+    const mode = s.mode || p.startMode || 'ui';
+    const level = s.haunt || p.hauntLevel || 'full';
+    const spotify = s.spotify || p.spotifyPresence || 'card';
+    const startOpen = p.startSettingsOpen === true || p.startSettingsOpen === 'true';
+    const settingsOpen = s.settingsOpen === undefined ? startOpen : s.settingsOpen;
+    const playing = s.playing === undefined ? true : s.playing;
+    const doorSound = s.doorSound === undefined ? level === 'full' : s.doorSound;
+    const bellSound = s.bellSound === undefined ? level !== 'subtle' : s.bellSound;
+    const tick = s.tick || 0;
+    const t = this.tokens(theme);
+    const spooky = level !== 'subtle';
+    const full = level === 'full';
+
+    const sessionPct = Math.round(p.sessionPct ?? 62);
+    const weekPct = Math.round(p.weekPct ?? 38);
+    let mood = 'CALM', moodColor = t.calm;
+    if (sessionPct >= 40) { mood = 'SIMMERING'; moodColor = t.warn; }
+    if (sessionPct >= 75) { mood = 'BOILING'; moodColor = t.warn; }
+    if (sessionPct >= 92) { mood = 'BOILING OVER'; moodColor = t.danger; }
+    const liqY = 116 - 84 * (sessionPct / 100);
+    const filled = Math.round(sessionPct / 10);
+
+    const frames = ['◐', '◓', '◑', '◒'];
+    const verbs = ['Brewing', 'Consulting the spirits', 'Rattling bones', 'Reading the bones'];
+    const spin = spooky ? frames[tick % 4] : '•';
+    const verb = spooky ? verbs[Math.floor(tick / 6) % verbs.length] : 'Working';
+    const idle = p.idleMinutes ?? 12;
+    const webScale = spooky ? 0.5 + Math.min(idle, 30) / 30 : 0.8;
+
+    const isUi = mode === 'ui';
+    const isDark = theme === 'dark';
+    const seg = (on) => ({ bg: on ? t.accent : 'transparent', fg: on ? t.accentInk : t.muted, on });
+    const hauntOpts = [['subtle', 'Subtle'], ['spooky', 'Spooky'], ['full', 'Full haunt']].map(([k, label]) => ({ label, ...seg(level === k), pick: () => this.setState({ haunt: k }) }));
+    const spotifyOpts = [['off', 'Off'], ['pill', 'Pill'], ['card', 'Card']].map(([k, label]) => ({ label, ...seg(spotify === k), pick: () => this.setState({ spotify: k }) }));
+    const font = s.font || p.uiFont || 'chakra';
+    const families = { chakra: "'Chakra Petch', 'Segoe UI', system-ui, sans-serif", excali: "'Excalifont', 'Chakra Petch', 'Segoe UI', sans-serif" };
+    const fontOpts = [['chakra', 'Chakra Petch'], ['excali', 'Excalifont']].map(([k, label]) => ({ label, family: families[k], ...seg(font === k), pick: () => this.setState({ font: k }) }));
+    const hauntHints = {
+      subtle: 'Plain wording, no fog or bats. Good for screen shares and March.',
+      spooky: 'Fog, candle flicker, moon spinner, tombstones and spooky wording.',
+      full: 'Everything: bats on finished tasks, glitchy errors and sound effects.'
+    };
+
+    return {
+      t, isUi, isCli: !isUi, isDark, isLight: !isDark,
+      spooky, full, subtle: !spooky,
+      themeLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+      uiBtnBg: isUi ? t.accent : 'transparent', uiBtnFg: isUi ? t.accentInk : t.muted,
+      cliBtnBg: isUi ? 'transparent' : t.accent, cliBtnFg: isUi ? t.muted : t.accentInk,
+      setUi: () => this.setState({ mode: 'ui' }),
+      setCli: () => this.setState({ mode: 'cli' }),
+      toggleTheme: () => this.setState({ theme: isDark ? 'light' : 'dark' }),
+      settingsOpen, settingsBorder: settingsOpen ? t.accent : t.line,
+      toggleSettings: () => this.setState({ settingsOpen: !settingsOpen }),
+      hauntOpts, spotifyOpts, fontOpts, uiFont: families[font] || families.chakra, hauntHint: hauntHints[level],
+      doorSound, bellSound,
+      toggleDoor: () => this.setState({ doorSound: !doorSound }),
+      toggleBell: () => this.setState({ bellSound: !bellSound }),
+      spotifyCard: spotify === 'card', spotifyPill: spotify === 'pill', spotifyOn: spotify !== 'off',
+      playing, paused: !playing,
+      playLabel: playing ? 'Pause' : 'Play',
+      playGlyph: playing ? '▶' : '❚❚',
+      togglePlay: () => this.setState({ playing: !playing }),
+      flicker: spooky ? 'wraithFlicker 3.2s linear infinite' : 'none',
+      cursorAnim: spooky ? 'wraithCursor 1.6s linear infinite' : 'none',
+      webScale,
+      spin, verbLower: verb.toLowerCase() + (spooky ? '…' : ''),
+      runLabel: spin + ' ' + (spooky ? verb + '… · 2m' : 'running · 2m'),
+      oldSessions: spooky
+        ? [{ title: 'RIP · Fix flaky CI test', meta: 'laid to rest 1h ago' }, { title: 'RIP · Spotify OAuth flow', meta: 'laid to rest yesterday' }]
+        : [{ title: 'Fix flaky CI test', meta: '1h ago' }, { title: 'Spotify OAuth flow', meta: 'yesterday' }],
+      newLabel: spooky ? 'Summon session' : 'New session',
+      placeholder: spooky ? 'Speak, mortal. Or type / for commands' : 'Ask anything, or type / for commands',
+      permTag: spooky ? 'AT THE DOOR' : 'NEEDS YOU',
+      permLead: spooky ? 'Claude is at the door and wants to run' : 'Claude wants to run',
+      cliPermLead: spooky ? 'Claude is at the door. Invite it in to run' : 'Run',
+      allowOnce: spooky ? 'Invite in once' : 'Allow once',
+      allowAlways: spooky ? 'Always welcome' : 'Always allow',
+      deny: spooky ? 'Banish' : 'Deny',
+      pumpkinArt: '      ,\n   .-\'|\'-.\n  / /\\ /\\ \\\n |    /\\   |\n  \\ \\/\\/\\/ /\n   \'-.__.-\'',
+      sessionPct, weekPct,
+      sessionW: sessionPct + '%', weekW: weekPct + '%',
+      sessionBar: '█'.repeat(filled) + '░'.repeat(10 - filled),
+      mood, moodColor,
+      liqY, b1: liqY - 9, b2: liqY - 20, b3: liqY - 30,
+      cauldronLabel: 'Cauldron ' + sessionPct + ' percent full, ' + mood.toLowerCase()
+    };
+  }
+}
+</script>
+</body>
+</html>

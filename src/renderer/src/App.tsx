@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react'
 import { useSettings } from './store/settings'
 import { FONT_FAMILIES } from './themes'
 import { TitleBar } from './components/TitleBar'
+import { CliView } from './components/CliView'
+import { EmptyState } from './components/EmptyState'
 
 export function App(): React.JSX.Element {
   const settings = useSettings((s) => s.settings)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const project = settings.projects.find((p) => p.id === settings.activeProjectId) ?? null
 
   useEffect(() => {
     const root = document.documentElement
@@ -17,9 +20,13 @@ export function App(): React.JSX.Element {
     <div className="app">
       <TitleBar settingsOpen={settingsOpen} onToggleSettings={() => setSettingsOpen((o) => !o)} />
       <main className="app-body">
-        <div style={{ margin: 'auto', color: 'var(--muted)' }}>
-          {settings.mode === 'ui' ? 'UI mode' : 'CLI mode'}
-        </div>
+        {!project ? (
+          <EmptyState />
+        ) : settings.mode === 'cli' ? (
+          <CliView key={project.id} project={project} />
+        ) : (
+          <div style={{ margin: 'auto', color: 'var(--muted)' }}>UI mode</div>
+        )}
       </main>
     </div>
   )

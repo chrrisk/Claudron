@@ -1,0 +1,95 @@
+.cli {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--term);
+  font-family: var(--mono-font);
+}
+
+.cli-term {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  padding: 16px 0 8px 24px;
+  z-index: 1;
+}
+
+.xterm-host {
+  width: 100%;
+  height: 100%;
+}
+
+.xterm .xterm-viewport {
+  background-color: transparent !important;
+}
+
+.statusline {
+  height: 32px;
+  flex: none;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  font-size: 12px;
+  border-top: 1px solid var(--line);
+  background: var(--chrome);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.statusline .seg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-right: 1px solid var(--line);
+}
+
+.statusline .seg.brand {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border-right: none;
+}
+
+.statusline .seg.state {
+  color: var(--accent);
+}
+
+.statusline .seg.unleashed {
+  background: var(--danger);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  border-right: none;
+}
+
+.statusline button.seg {
+  border: none;
+  border-left: 1px solid var(--line);
+  border-right: none;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  font: inherit;
+}
+
+.statusline .fg {
+  color: var(--fg);
+}
+.statusline .muted {
+  color: var(--muted);
+}
+.statusline .violet {
+  color: var(--violet);
+}
+.statusline .ok {
+  color: var(--ok);
+}
+
+.statusline .spacer {
+  flex: 1;
+}

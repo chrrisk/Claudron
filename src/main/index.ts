@@ -1,4 +1,6 @@
+import { homedir } from 'node:os'
 import { app, BrowserWindow } from 'electron'
+import { agent, listProjectSessions, loadHistory, openSession } from './agent'
 import { findClaude } from './claude-path'
 import { gitBranch, pickProject } from './projects'
 import { killAllPtys, killPty, resizePty, spawnPty, writePty } from './pty'
@@ -14,11 +16,13 @@ if (process.env['WRAITH_USER_DATA']) app.setPath('userData', process.env['WRAITH
 let mainWindow: BrowserWindow | null = null
 
 function registerIpc(): void {
+  handle('app:info', () => ({ home: homedir(), version: app.getVersion() }))
   handle('settings:get', () => getSettings())
   handle('settings:set', (patch) => {
     const prev = getSettings()
     const next = setSettings(patch)
     if (mainWindow && prev.theme !== next.theme) applyWindowTheme(mainWindow, next.theme)
+    if (prev.permissionMode !== next.permissionMode) void agent.setPermissionMode(next.permissionMode)
     return next
   })
   handle('projects:pick', () => pickProject())
@@ -33,6 +37,14 @@ function registerIpc(): void {
   listen('pty:write', (id, data) => writePty(id, data))
   listen('pty:resize', (id, cols, rows) => resizePty(id, cols, rows))
   listen('pty:kill', (id) => killPty(id))
+
+  handle('agent:open', (opts) => openSession(opts))
+  handle('agent:send', (key, text) => agent.send(key, text))
+  handle('agent:interrupt', (key) => agent.interrupt(key))
+  handle('agent:respond', (key, requestId, decision) => agent.respond(key, requestId, decision))
+  handle('agent:close', (key) => agent.close(key))
+  handle('agent:sessions', (cwd) => listProjectSessions(cwd))
+  handle('agent:history', (sessionId, cwd) => loadHistory(sessionId, cwd))
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -60,7 +72,10 @@ if (!app.requestSingleInstanceLock()) {
     })
   })
 
-  app.on('before-quit', () => killAllPtys())
+  app.on('before-quit', () => {
+    killAllPtys()
+    agent.closeAll()
+  })
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()

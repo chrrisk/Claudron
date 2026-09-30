@@ -1,3 +1,4 @@
+import type { AgentEnvelope, AgentEvent, AgentStartOptions, PermissionDecision, SessionSummary } from './agent'
 import type { PtyData, PtyExit, PtySpawnOptions, PtySpawnResult } from './pty'
 import type { Project, Settings } from './settings'
 
@@ -7,12 +8,20 @@ import type { Project, Settings } from './settings'
  * renamed field breaks the build instead of the app.
  */
 export interface InvokeMap {
+  'app:info': { args: []; result: { home: string; version: string } }
   'settings:get': { args: []; result: Settings }
   'settings:set': { args: [patch: Partial<Settings>]; result: Settings }
   'projects:pick': { args: []; result: Project | null }
   'projects:branch': { args: [path: string]; result: string | null }
   'claude:locate': { args: []; result: { path: string; source: string } | null }
   'pty:spawn': { args: [opts: PtySpawnOptions]; result: PtySpawnResult }
+  'agent:open': { args: [opts: AgentStartOptions]; result: void }
+  'agent:send': { args: [key: string, text: string]; result: void }
+  'agent:interrupt': { args: [key: string]; result: void }
+  'agent:respond': { args: [key: string, requestId: string, decision: PermissionDecision]; result: void }
+  'agent:close': { args: [key: string]; result: void }
+  'agent:sessions': { args: [cwd: string]; result: SessionSummary[] }
+  'agent:history': { args: [sessionId: string, cwd: string]; result: AgentEvent[] }
 }
 
 /** Fire-and-forget messages from renderer to main. */
@@ -28,16 +37,25 @@ export interface EventMap {
   'settings:changed': Settings
   'pty:data': PtyData
   'pty:exit': PtyExit
+  'agent:event': AgentEnvelope
 }
 
 // Runtime allowlists. Typed as Record<keyof Map, true> so a missing key fails to compile.
 export const INVOKE_CHANNELS: Record<keyof InvokeMap, true> = {
+  'app:info': true,
   'settings:get': true,
   'settings:set': true,
   'projects:pick': true,
   'projects:branch': true,
   'claude:locate': true,
-  'pty:spawn': true
+  'pty:spawn': true,
+  'agent:open': true,
+  'agent:send': true,
+  'agent:interrupt': true,
+  'agent:respond': true,
+  'agent:close': true,
+  'agent:sessions': true,
+  'agent:history': true
 }
 
 export const SEND_CHANNELS: Record<keyof SendMap, true> = {
@@ -50,7 +68,8 @@ export const SEND_CHANNELS: Record<keyof SendMap, true> = {
 export const EVENT_CHANNELS: Record<keyof EventMap, true> = {
   'settings:changed': true,
   'pty:data': true,
-  'pty:exit': true
+  'pty:exit': true,
+  'agent:event': true
 }
 
 export type Unsubscribe = () => void

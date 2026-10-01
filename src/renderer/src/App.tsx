@@ -4,6 +4,7 @@ import { FONT_FAMILIES } from './themes'
 import { TitleBar } from './components/TitleBar'
 import { CliView } from './components/CliView'
 import { EmptyState } from './components/EmptyState'
+import { UiView } from './components/UiView'
 
 export function App(): React.JSX.Element {
   const settings = useSettings((s) => s.settings)
@@ -25,7 +26,7 @@ export function App(): React.JSX.Element {
         ) : settings.mode === 'cli' ? (
           <CliView key={project.id} project={project} />
         ) : (
-          <div style={{ margin: 'auto', color: 'var(--muted)' }}>UI mode</div>
+          <UiView key={project.id} project={project} />
         )}
       </main>
     </div>

@@ -10,15 +10,17 @@ import '@fontsource/jetbrains-mono/700.css'
 import './styles/base.css'
 import './styles/titlebar.css'
 import './styles/cli.css'
+import './styles/ui.css'
 import { installThemeVars, MONO } from './themes'
 import { hydrateSettings } from './store/settings'
+import { loadAppInfo } from './lib/paths'
 import { App } from './App'
 
 installThemeVars()
 document.documentElement.style.setProperty('--mono-font', MONO)
 document.body.classList.add(`platform-${window.wraith.platform}`)
 
-void hydrateSettings().then(() => {
+void Promise.all([hydrateSettings(), loadAppInfo()]).then(() => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <App />

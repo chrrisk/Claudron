@@ -162,7 +162,11 @@ export function safeFit(entry: TermEntry): void {
   }
 }
 
-async function startClaude(entry: TermEntry, permissionMode: WraithPermissionMode): Promise<void> {
+async function startClaude(
+  entry: TermEntry,
+  permissionMode: WraithPermissionMode,
+  continueSession = false
+): Promise<void> {
   entry.status = 'starting'
   notify()
   const res = await window.wraith.invoke('pty:spawn', {
@@ -170,7 +174,8 @@ async function startClaude(entry: TermEntry, permissionMode: WraithPermissionMod
     cwd: entry.cwd,
     cols: entry.term.cols,
     rows: entry.term.rows,
-    permissionMode
+    permissionMode,
+    continueSession
   })
   if (res.ok) {
     entry.status = 'running'
@@ -183,13 +188,22 @@ async function startClaude(entry: TermEntry, permissionMode: WraithPermissionMod
   notify()
 }
 
-/** Kill and restart claude in place, e.g. after the permission mode changes. */
+/**
+ * Kill and restart claude in place, e.g. after the permission mode changes.
+ * --continue brings the same conversation back, so nothing is lost.
+ */
 export async function restartTerminal(id: string, permissionMode: WraithPermissionMode): Promise<void> {
   const e = entries.get(id)
-  if (!e) return
+  if (!e || e.status === 'idle') return
+  currentPermissionMode = permissionMode
   window.wraith.send('pty:kill', id)
-  e.term.reset()
-  await startClaude(e, permissionMode)
+  e.term.write('\r\n\x1b[2m[wraith: restarting claude with the new permission mode]\x1b[0m\r\n')
+  await startClaude(e, permissionMode, true)
+}
+
+/** Restart every running terminal (permission mode is global). */
+export async function restartAllTerminals(permissionMode: WraithPermissionMode): Promise<void> {
+  await Promise.all([...entries.keys()].map((id) => restartTerminal(id, permissionMode)))
 }
 
 export function disposeTerminal(id: string): void {

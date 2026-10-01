@@ -7,6 +7,8 @@ export interface PtySpawnOptions {
   cols: number
   rows: number
   permissionMode: WraithPermissionMode
+  /** Pass --continue to pick the most recent conversation back up. */
+  continueSession?: boolean
 }
 
 export type PtySpawnResult =

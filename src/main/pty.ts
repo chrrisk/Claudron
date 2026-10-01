@@ -6,6 +6,8 @@ import { loadShellEnv } from './shell-env'
 
 interface Session {
   proc: pty.IPty
+  /** Set when we killed it on purpose (restart, tab close), so no exit notice is sent. */
+  killed?: boolean
   buffer: string
   flushQueued: boolean
 }
@@ -57,7 +59,11 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
     }
   }
 
-  const args = [...permissionFlags(opts.permissionMode), ...argProviders.flatMap((p) => p(opts))]
+  const args = [
+    ...(opts.continueSession ? ['--continue'] : []),
+    ...permissionFlags(opts.permissionMode),
+    ...argProviders.flatMap((p) => p(opts))
+  ]
   const target = spawnTarget(claude.path, args)
 
   let proc: pty.IPty
@@ -89,7 +95,7 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
   proc.onExit(({ exitCode }) => {
     flush(opts.id)
     if (sessions.get(opts.id)?.proc === proc) sessions.delete(opts.id)
-    broadcast('pty:exit', { id: opts.id, exitCode })
+    if (!session.killed) broadcast('pty:exit', { id: opts.id, exitCode })
   })
 
   return { ok: true, pid: proc.pid, binary: claude.path, reused: false }
@@ -113,6 +119,7 @@ export function killPty(id: string): void {
   const s = sessions.get(id)
   if (!s) return
   sessions.delete(id)
+  s.killed = true
   try {
     s.proc.kill()
   } catch {

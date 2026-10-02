@@ -36,7 +36,7 @@ interface Props {
 }
 
 export function PermissionCard({ request, cwd, active, onDecide }: Props): React.JSX.Element {
-  const { copy, spooky, still } = useHaunt()
+  const { copy } = useHaunt()
   const denyRef = useRef<HTMLButtonElement>(null)
   const { verb, subject: raw } = permissionSubject(request)
   const subject = cwd && raw.startsWith(cwd + '/') ? raw.slice(cwd.length + 1) : raw
@@ -66,7 +66,7 @@ export function PermissionCard({ request, cwd, active, onDecide }: Props): React
 
   return (
     <div className="perm-card" role="alertdialog" aria-label={`${copy.permTag}: ${lead} ${subject}`}>
-      <div className="perm-glow" data-anim="flicker" aria-hidden="true" style={{ animation: spooky && !still ? undefined : 'none' }} />
+      <div className="perm-glow" data-anim="flicker" aria-hidden="true" />
       <div className="perm-line">
         <span className="perm-tag">{copy.permTag}</span>
         <span>{lead}</span>

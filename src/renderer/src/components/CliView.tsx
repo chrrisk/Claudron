@@ -11,6 +11,9 @@ import {
   subscribeTerminals
 } from '../lib/terminals'
 import { StatusLine } from './StatusLine'
+import { Fog, TerminalBats } from './Haunting'
+import { bannerFor } from '../lib/pumpkin'
+import { tildify } from '../lib/paths'
 
 export function CliView({ project }: { project: Project }): React.JSX.Element {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -21,7 +24,11 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
     const host = hostRef.current
     if (!host) return
     const entry = ensureTerminal(project.id, project.path, theme)
-    void attachTerminal(entry, host, permissionMode)
+    void attachTerminal(entry, host, permissionMode, async (e) => {
+      const { haunt, theme: th } = useSettings.getState().settings
+      const branch = await window.wraith.invoke('projects:branch', project.path)
+      e.term.write(bannerFor(haunt, { dir: tildify(project.path), branch, light: th === 'light' }))
+    })
     const ro = new ResizeObserver(() => safeFit(entry))
     ro.observe(host)
     return () => {
@@ -38,6 +45,8 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
 
   return (
     <div className="cli">
+      <Fog />
+      <TerminalBats />
       <div className="cli-term" ref={hostRef} data-status={status} />
       <StatusLine project={project} />
     </div>

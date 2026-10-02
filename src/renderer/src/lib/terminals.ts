@@ -129,7 +129,7 @@ export async function attachTerminal(
   entry: TermEntry,
   host: HTMLElement,
   permissionMode: WraithPermissionMode,
-  beforeStart?: (entry: TermEntry) => void
+  beforeStart?: (entry: TermEntry) => void | Promise<void>
 ): Promise<void> {
   currentPermissionMode = permissionMode
   host.appendChild(entry.element)
@@ -147,7 +147,7 @@ export async function attachTerminal(
   }
   safeFit(entry)
   if (entry.status === 'idle') {
-    beforeStart?.(entry)
+    await beforeStart?.(entry)
     await startClaude(entry, permissionMode)
   }
   entry.term.focus()

@@ -1,0 +1,140 @@
+.rail {
+  width: 300px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 16px;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  overflow-y: auto;
+}
+
+.rail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel2);
+}
+
+.rail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+}
+
+.cauldron {
+  flex: 1;
+}
+
+.cauldron.over {
+  border-color: var(--danger);
+}
+
+.cauldron-svg {
+  align-self: center;
+  max-width: 100%;
+  height: auto;
+}
+
+.cauldron-svg .liquid {
+  transition: y 0.8s ease;
+}
+
+@keyframes wraithBubble {
+  0% { transform: translateY(0); opacity: 0.9; }
+  100% { transform: translateY(-8px); opacity: 0; }
+}
+
+@keyframes wraithDrip {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.15); }
+}
+
+.cauldron-svg .bubble {
+  animation: wraithBubble 1.8s ease-in infinite;
+  transform-box: fill-box;
+}
+
+.cauldron-svg .drip {
+  animation: wraithDrip 2.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: top;
+}
+
+.usage-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.usage-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.usage-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.usage-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.usage-bar > div {
+  height: 100%;
+  transition: width 0.6s ease;
+}
+
+.usage-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.usage-foot {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.link-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.link-btn:hover {
+  color: var(--fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cauldron-svg .bubble,
+  .cauldron-svg .drip {
+    animation: none;
+  }
+  .cauldron-svg .liquid,
+  .usage-bar > div {
+    transition: none;
+  }
+}

@@ -7,8 +7,9 @@ import { ContextStrip } from './ContextStrip'
 import { MessageList } from './MessageList'
 import { Sidebar } from './Sidebar'
 import { Cobweb, Fog, TaskToast } from './Haunting'
+import { RightRail } from './RightRail'
 
-export function UiView({ project, rail }: { project: Project; rail?: React.ReactNode }): React.JSX.Element {
+export function UiView({ project }: { project: Project }): React.JSX.Element {
   const mode = useSettings((s) => s.settings.permissionMode)
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export function UiView({ project, rail }: { project: Project; rail?: React.React
         <TaskToast projectKey={project.id} />
         <Composer project={project} />
       </section>
-      {rail}
+      <RightRail />
     </div>
   )
 }

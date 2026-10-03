@@ -13,16 +13,20 @@ import './styles/cli.css'
 import './styles/ui.css'
 import './styles/popover.css'
 import './styles/haunt.css'
+import './styles/rail.css'
 import { installThemeVars, MONO } from './themes'
 import { hydrateSettings } from './store/settings'
 import { loadAppInfo } from './lib/paths'
+import { hydrateUsage } from './store/usage'
+import { wireCliEvents } from './store/cli'
 import { App } from './App'
 
 installThemeVars()
+wireCliEvents()
 document.documentElement.style.setProperty('--mono-font', MONO)
 document.body.classList.add(`platform-${window.wraith.platform}`)
 
-void Promise.all([hydrateSettings(), loadAppInfo()]).then(() => {
+void Promise.all([hydrateSettings(), loadAppInfo(), hydrateUsage()]).then(() => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <App />

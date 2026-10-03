@@ -26,8 +26,8 @@ export function childEnv(extra: Record<string, string> = {}): Record<string, str
   return { ...env, ...extra }
 }
 
-/** Extra CLI args contributed by other modules (the usage tap adds --settings). */
-type ArgProvider = (opts: PtySpawnOptions) => string[]
+/** Extra CLI args and env contributed by other modules (the usage tap adds --settings). */
+type ArgProvider = (opts: PtySpawnOptions) => { args: string[]; env?: Record<string, string> }
 const argProviders: ArgProvider[] = []
 export function addPtyArgs(provider: ArgProvider): void {
   argProviders.push(provider)
@@ -59,11 +59,13 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
     }
   }
 
+  const extras = argProviders.map((p) => p(opts))
   const args = [
     ...(opts.continueSession ? ['--continue'] : []),
     ...permissionFlags(opts.permissionMode),
-    ...argProviders.flatMap((p) => p(opts))
+    ...extras.flatMap((e) => e.args)
   ]
+  const extraEnv = Object.assign({}, ...extras.map((e) => e.env ?? {})) as Record<string, string>
   const target = spawnTarget(claude.path, args)
 
   let proc: pty.IPty
@@ -73,7 +75,7 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
       cols: Math.max(opts.cols, 2),
       rows: Math.max(opts.rows, 2),
       cwd: opts.cwd,
-      env: childEnv({ TERM: 'xterm-256color', COLORTERM: 'truecolor', TERM_PROGRAM: 'wraith' }),
+      env: childEnv({ ...extraEnv, TERM: 'xterm-256color', COLORTERM: 'truecolor', TERM_PROGRAM: 'wraith' }),
       useConpty: true
     })
   } catch (err) {

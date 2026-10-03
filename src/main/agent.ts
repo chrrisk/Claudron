@@ -36,6 +36,7 @@ export function loadSdk(): Promise<Sdk> {
 export const agentBus = new EventEmitter<{
   rateLimit: [info: SDKRateLimitInfo]
   query: [q: Query]
+  turnEnd: []
 }>()
 
 export function sdkPermissionMode(mode: WraithPermissionMode): PermissionMode {
@@ -220,6 +221,7 @@ class AgentSession {
           error: ok ? undefined : 'errors' in msg && msg.errors?.length ? msg.errors.join('\n') : undefined
         })
         void this.refreshContext()
+        agentBus.emit('turnEnd')
         return
       }
       case 'rate_limit_event':

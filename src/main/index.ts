@@ -8,6 +8,7 @@ import { loadShellEnv } from './shell-env'
 import { getSettings, setSettings } from './settings-store'
 import { handle, listen } from './ipc'
 import { maybeSnapshot } from './snapshot'
+import { getUsage, installCliTap, refreshUsage, startUsagePolling, stopUsage } from './usage'
 import { applyWindowTheme, createMainWindow } from './window'
 
 // Lets dev runs and screenshots use a throwaway profile.
@@ -45,6 +46,9 @@ function registerIpc(): void {
   handle('agent:close', (key) => agent.close(key))
   handle('agent:sessions', (cwd) => listProjectSessions(cwd))
   handle('agent:history', (sessionId, cwd) => loadHistory(sessionId, cwd))
+
+  handle('usage:get', () => getUsage())
+  handle('usage:refresh', () => refreshUsage())
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -60,6 +64,8 @@ if (!app.requestSingleInstanceLock()) {
     app.setAppUserModelId('dev.wraith.app')
     void loadShellEnv()
     registerIpc()
+    installCliTap()
+    startUsagePolling()
     mainWindow = createMainWindow(getSettings().theme)
     mainWindow.on('closed', () => (mainWindow = null))
     maybeSnapshot(mainWindow)
@@ -75,6 +81,7 @@ if (!app.requestSingleInstanceLock()) {
   app.on('before-quit', () => {
     killAllPtys()
     agent.closeAll()
+    stopUsage()
   })
 
   app.on('window-all-closed', () => {

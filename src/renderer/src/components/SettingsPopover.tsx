@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { HauntLevel, Settings, SpotifyPresence, UiFont, WraithPermissionMode } from '@shared/settings'
 import { soundDefaults } from '@shared/sounds'
 import { useSettings } from '../store/settings'
+import { useSpotify } from '../store/spotify'
 import { FONT_FAMILIES } from '../themes'
 import { UnleashedWarning } from './UnleashedWarning'
 
@@ -71,6 +72,41 @@ function Segmented<T extends string>({
         </button>
       ))}
     </div>
+  )
+}
+
+function SpotifySettings(): React.JSX.Element {
+  const settings = useSettings((s) => s.settings)
+  const update = useSettings((s) => s.update)
+  const status = useSpotify((s) => s.state.status)
+  return (
+    <>
+      <label className="pop-field">
+        <span className="pop-hint">Client id (from developer.spotify.com, no secret needed)</span>
+        <input
+          className="pop-input"
+          spellCheck={false}
+          placeholder="paste client id"
+          defaultValue={settings.spotifyClientId}
+          onBlur={(e) => e.target.value.trim() !== settings.spotifyClientId && update({ spotifyClientId: e.target.value.trim() })}
+        />
+      </label>
+      <label className="pop-field">
+        <span className="pop-hint">Pinned spooky playlist (optional link)</span>
+        <input
+          className="pop-input"
+          spellCheck={false}
+          placeholder="open.spotify.com/playlist/..."
+          defaultValue={settings.spookyPlaylist}
+          onBlur={(e) => update({ spookyPlaylist: e.target.value.trim() })}
+        />
+      </label>
+      {status === 'connected' && (
+        <button className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => void window.wraith.invoke('spotify:disconnect')}>
+          Disconnect Spotify
+        </button>
+      )}
+    </>
   )
 }
 
@@ -158,6 +194,7 @@ export function SettingsPopover({ onClose }: { onClose: () => void }): React.JSX
         <div className="pop-section">
           <span className="pop-heading">SPOTIFY PRESENCE</span>
           <Segmented label="Spotify presence" options={SPOTIFY} value={settings.spotify} onPick={set('spotify')} />
+          {settings.spotify !== 'off' && <SpotifySettings />}
         </div>
       </div>
       {warn && (

@@ -8,6 +8,7 @@ import { getTerminal } from '../lib/terminals'
 import { useHaunt } from '../lib/haunt'
 import { useSettings } from '../store/settings'
 import { useTicker } from '../lib/hooks'
+import { SpotifySegment } from './Spotify'
 
 function stateLabel(
   status: string | undefined,
@@ -25,6 +26,7 @@ export function StatusLine({ project }: { project: Project }): React.JSX.Element
   const { spooky, still, copy } = useHaunt()
   const entry = getTerminal(project.id)
   const unleashed = useSettings((s) => s.settings.permissionMode === 'unleashed')
+  const spotifyOn = useSettings((s) => s.settings.spotify !== 'off')
   const usage = useUsage((s) => s.usage)
   const cli = useCli((s) => s.sessions[project.id])
   const session = isFresh(usage.session) ? Math.round(usage.session.percent) : null
@@ -63,6 +65,7 @@ export function StatusLine({ project }: { project: Project }): React.JSX.Element
         wk <span className={weekly === null ? 'muted' : 'violet'}>{weekly === null ? '--' : `${weekly}%`}</span>
       </span>
       <span className="spacer" />
+      {spotifyOn && <SpotifySegment />}
     </div>
   )
 }

@@ -19,14 +19,17 @@ import { hydrateSettings } from './store/settings'
 import { loadAppInfo } from './lib/paths'
 import { hydrateUsage } from './store/usage'
 import { wireCliEvents } from './store/cli'
+import { hydrateSpotify, spotify } from './store/spotify'
+import { hotkeys } from './lib/terminals'
 import { App } from './App'
 
 installThemeVars()
 wireCliEvents()
+hotkeys.ctrlSpace = () => spotify('toggle')
 document.documentElement.style.setProperty('--mono-font', MONO)
 document.body.classList.add(`platform-${window.wraith.platform}`)
 
-void Promise.all([hydrateSettings(), loadAppInfo(), hydrateUsage()]).then(() => {
+void Promise.all([hydrateSettings(), loadAppInfo(), hydrateUsage(), hydrateSpotify()]).then(() => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <App />

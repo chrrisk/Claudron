@@ -166,3 +166,9 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+.pop-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

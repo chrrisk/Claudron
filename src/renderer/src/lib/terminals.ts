@@ -22,6 +22,7 @@ export interface TermEntry {
 }
 
 const entries = new Map<string, TermEntry>()
+export const hotkeys: { ctrlSpace?: () => void } = {}
 const listeners = new Set<() => void>()
 let wired = false
 
@@ -110,6 +111,15 @@ export function ensureTerminal(id: string, cwd: string, theme: Theme): TermEntry
   e = { id, cwd, term, fit, element, status: 'idle', lastOutputAt: 0, opened: false }
   const entry = e
   entries.set(id, entry)
+
+  // ctrl+space is Wraith's play/pause hotkey; keep it from reaching claude as a NUL byte.
+  term.attachCustomKeyEventHandler((ev) => {
+    if (ev.ctrlKey && !ev.metaKey && !ev.altKey && ev.code === 'Space') {
+      if (ev.type === 'keydown') hotkeys.ctrlSpace?.()
+      return false
+    }
+    return true
+  })
 
   term.onData((data) => {
     if (entry.status === 'exited') {

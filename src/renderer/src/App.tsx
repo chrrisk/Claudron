@@ -8,6 +8,7 @@ import { EmptyState } from './components/EmptyState'
 import { UiView } from './components/UiView'
 import { SettingsPopover } from './components/SettingsPopover'
 import { SoundEffects } from './components/SoundEffects'
+import { SpotifyPill } from './components/Spotify'
 
 export function App(): React.JSX.Element {
   const settings = useSettings((s) => s.settings)
@@ -31,7 +32,11 @@ export function App(): React.JSX.Element {
 
   return (
     <div className="app">
-      <TitleBar settingsOpen={settingsOpen} onToggleSettings={() => setSettingsOpen((o) => !o)} />
+      <TitleBar
+        settingsOpen={settingsOpen}
+        onToggleSettings={() => setSettingsOpen((o) => !o)}
+        rightSlot={settings.spotify === 'pill' ? <SpotifyPill /> : null}
+      />
       <SoundEffects />
       {settingsOpen && <SettingsPopover onClose={() => setSettingsOpen(false)} />}
       <main className="app-body">

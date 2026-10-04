@@ -26,6 +26,10 @@ export interface Settings {
   unleashedWarned: boolean
   projects: Project[]
   activeProjectId: string | null
+  /** Spotify app client id (PKCE, no secret). Empty uses the build-time default, if any. */
+  spotifyClientId: string
+  /** Playlist URI or link for the spooky button. Empty means search for one. */
+  spookyPlaylist: string
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -39,5 +43,7 @@ export const DEFAULT_SETTINGS: Settings = {
   permissionMode: 'ask',
   unleashedWarned: false,
   projects: [],
-  activeProjectId: null
+  activeProjectId: null,
+  spotifyClientId: '',
+  spookyPlaylist: ''
 }

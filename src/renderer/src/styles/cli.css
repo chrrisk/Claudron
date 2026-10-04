@@ -93,3 +93,71 @@
 .statusline .spacer {
   flex: 1;
 }
+
+.cli-banner {
+  flex: none;
+  position: relative;
+  z-index: 1;
+  padding: 20px 32px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  max-height: 160px;
+  overflow: hidden;
+  transition:
+    max-height 0.6s ease,
+    padding 0.6s ease,
+    opacity 0.4s ease;
+}
+
+.cli-banner.gone {
+  max-height: 0;
+  padding-top: 0;
+  opacity: 0;
+}
+
+.banner-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.pumpkin {
+  margin: 0;
+  color: var(--accent);
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.banner-text span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.banner-title {
+  letter-spacing: 0.4em;
+  font-weight: 700;
+}
+
+.cli .muted {
+  color: var(--muted);
+}
+.cli .violet {
+  color: var(--violet);
+}
+.cli .fg {
+  color: var(--fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cli-banner {
+    transition: none;
+  }
+}

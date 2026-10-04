@@ -1,6 +1,7 @@
 import type { AgentEnvelope, AgentEvent, AgentStartOptions, PermissionDecision, SessionSummary } from './agent'
 import type { PtyData, PtyExit, PtySpawnOptions, PtySpawnResult } from './pty'
 import type { Project, Settings } from './settings'
+import type { SpotifyCommand, SpotifyState } from './spotify'
 import type { UsageSnapshot } from './usage'
 
 /**
@@ -25,6 +26,10 @@ export interface InvokeMap {
   'agent:history': { args: [sessionId: string, cwd: string]; result: AgentEvent[] }
   'usage:get': { args: []; result: UsageSnapshot }
   'usage:refresh': { args: []; result: void }
+  'spotify:get': { args: []; result: SpotifyState }
+  'spotify:connect': { args: []; result: void }
+  'spotify:disconnect': { args: []; result: void }
+  'spotify:command': { args: [cmd: SpotifyCommand]; result: void }
 }
 
 /** Fire-and-forget messages from renderer to main. */
@@ -46,6 +51,7 @@ export interface EventMap {
   'cli:status': { id: string; model: string | null; contextPct: number | null }
   /** Hook events from a CLI session: permission, tool-done, prompt, stop. */
   'cli:event': { id: string; kind: string; at: number }
+  'spotify:state': SpotifyState
 }
 
 // Runtime allowlists. Typed as Record<keyof Map, true> so a missing key fails to compile.
@@ -65,7 +71,11 @@ export const INVOKE_CHANNELS: Record<keyof InvokeMap, true> = {
   'agent:sessions': true,
   'agent:history': true,
   'usage:get': true,
-  'usage:refresh': true
+  'usage:refresh': true,
+  'spotify:get': true,
+  'spotify:connect': true,
+  'spotify:disconnect': true,
+  'spotify:command': true
 }
 
 export const SEND_CHANNELS: Record<keyof SendMap, true> = {
@@ -82,7 +92,8 @@ export const EVENT_CHANNELS: Record<keyof EventMap, true> = {
   'agent:event': true,
   'usage:changed': true,
   'cli:status': true,
-  'cli:event': true
+  'cli:event': true,
+  'spotify:state': true
 }
 
 export type Unsubscribe = () => void

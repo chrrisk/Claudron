@@ -1,6 +1,6 @@
 import { homedir } from 'node:os'
 import { app, BrowserWindow } from 'electron'
-import { agent, listProjectSessions, loadHistory, openSession } from './agent'
+import { agent, listProjectSessions, loadHistory, openSession, permissionEvents } from './agent'
 import { findClaude } from './claude-path'
 import { gitBranch, pickProject } from './projects'
 import { killAllPtys, killPty, resizePty, spawnPty, writePty } from './pty'
@@ -8,7 +8,16 @@ import { loadShellEnv } from './shell-env'
 import { getSettings, setSettings } from './settings-store'
 import { handle, listen } from './ipc'
 import { maybeSnapshot } from './snapshot'
-import { getUsage, installCliTap, refreshUsage, startUsagePolling, stopUsage } from './usage'
+import {
+  connectSpotify,
+  disconnectSpotify,
+  getSpotifyState,
+  initSpotify,
+  restoreVolumeOnQuit,
+  setPermissionWaiting,
+  spotifyCommand
+} from './spotify'
+import { getUsage, installCliTap, onCliEvent, refreshUsage, startUsagePolling, stopUsage } from './usage'
 import { applyWindowTheme, createMainWindow } from './window'
 
 // Lets dev runs and screenshots use a throwaway profile.
@@ -24,6 +33,7 @@ function registerIpc(): void {
     const next = setSettings(patch)
     if (mainWindow && prev.theme !== next.theme) applyWindowTheme(mainWindow, next.theme)
     if (prev.permissionMode !== next.permissionMode) void agent.setPermissionMode(next.permissionMode)
+    if (prev.spotifyClientId !== next.spotifyClientId) void initSpotify()
     return next
   })
   handle('projects:pick', () => pickProject())
@@ -49,6 +59,27 @@ function registerIpc(): void {
 
   handle('usage:get', () => getUsage())
   handle('usage:refresh', () => refreshUsage())
+
+  handle('spotify:get', () => getSpotifyState())
+  handle('spotify:connect', () => connectSpotify())
+  handle('spotify:disconnect', () => disconnectSpotify())
+  handle('spotify:command', (cmd) => spotifyCommand(cmd))
+}
+
+/** Duck the music while any permission prompt waits, UI or CLI. */
+function wireDucking(): void {
+  let uiWaiting = false
+  const cliWaiting = new Set<string>()
+  const update = (): void => setPermissionWaiting(uiWaiting || cliWaiting.size > 0)
+  permissionEvents.on('waiting', (w) => {
+    uiWaiting = w
+    update()
+  })
+  onCliEvent((id, kind) => {
+    if (kind === 'permission') cliWaiting.add(id)
+    else cliWaiting.delete(id)
+    update()
+  })
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -66,6 +97,8 @@ if (!app.requestSingleInstanceLock()) {
     registerIpc()
     installCliTap()
     startUsagePolling()
+    wireDucking()
+    void initSpotify()
     mainWindow = createMainWindow(getSettings().theme)
     mainWindow.on('closed', () => (mainWindow = null))
     maybeSnapshot(mainWindow)
@@ -78,7 +111,15 @@ if (!app.requestSingleInstanceLock()) {
     })
   })
 
-  app.on('before-quit', () => {
+  let restored = false
+  app.on('before-quit', (e) => {
+    // Never leave someone's music stuck at 30%.
+    if (!restored) {
+      e.preventDefault()
+      restored = true
+      void Promise.race([restoreVolumeOnQuit(), new Promise((r) => setTimeout(r, 1500))]).then(() => app.quit())
+      return
+    }
     killAllPtys()
     agent.closeAll()
     stopUsage()

@@ -1,0 +1,55 @@
+appId: dev.wraith.app
+productName: Wraith
+copyright: Copyright © 2026 chrrisk
+directories:
+  buildResources: build
+  output: release/${version}
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+extraResources:
+  - from: resources/wraith-tap.cjs
+    to: wraith-tap.cjs
+asar: true
+asarUnpack:
+  # native addon + spawn-helper, and the Claude Code binary the Agent SDK runs
+  - node_modules/node-pty/**
+  - node_modules/@anthropic-ai/claude-agent-sdk-*/**
+# node-pty ships N-API prebuilds for every target, so nothing to compile.
+npmRebuild: false
+
+mac:
+  category: public.app-category.developer-tools
+  icon: build/icon.png
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # One DMG per arch: the bundled Claude Code binary is ~220 MB per
+  # architecture, so a universal build would ship both.
+  target:
+    - target: dmg
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+dmg:
+  title: ${productName} ${version}
+  writeUpdateInfo: false
+
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: ${productName}-${version}-win-${arch}-setup.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: Wraith
+
+linux:
+  target: [AppImage]
+  category: Development
+  icon: build/icon.png
+
+publish: null

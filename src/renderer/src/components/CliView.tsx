@@ -31,7 +31,8 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
     if (!host) return
     const entry = ensureTerminal(project.id, project.path, theme)
     void attachTerminal(entry, host, permissionMode)
-    const typed = entry.term.onData(() => {
+    // onKey, not onData: xterm also emits onData for automatic replies to claude's terminal queries.
+    const typed = entry.term.onKey(() => {
       setTyped(true)
       typed.dispose()
     })

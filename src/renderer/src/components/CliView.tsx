@@ -13,7 +13,7 @@ import {
 import { StatusLine } from './StatusLine'
 import { Fog, TerminalBats } from './Haunting'
 import { PumpkinBanner } from './PumpkinBanner'
-import { tildify } from '../lib/paths'
+import { shortPath } from '../lib/paths'
 
 export function CliView({ project }: { project: Project }): React.JSX.Element {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -55,7 +55,7 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
     <div className="cli">
       <Fog />
       <TerminalBats />
-      <PumpkinBanner where={[tildify(project.path), branch].filter(Boolean).join(' · ')} dismissed={typed} />
+      <PumpkinBanner where={[shortPath(project.path), branch].filter(Boolean).join(' · ')} dismissed={typed} />
       <div className="cli-term" ref={hostRef} data-status={status} />
       <StatusLine project={project} />
     </div>

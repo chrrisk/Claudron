@@ -69,7 +69,15 @@ export function MessageList({ project }: { project: Project }): React.JSX.Elemen
             <div className="assistant-body">
               {g.items.map((it) => {
                 if (it.kind === 'text') return <Markdown key={it.id} text={it.text} />
-                if (it.kind === 'tool') return <ToolCard key={it.id} item={it} cwd={project.path} />
+                if (it.kind === 'tool')
+                  return (
+                    <ToolCard
+                      key={it.id}
+                      item={it}
+                      cwd={project.path}
+                      waiting={permissions.some((p) => p.requestId === it.id)}
+                    />
+                  )
                 if (it.kind === 'error')
                   return (
                     <div key={it.id} className="error-line" data-anim="glitch">

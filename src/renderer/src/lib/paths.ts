@@ -13,6 +13,15 @@ export function tildify(path: string): string {
   return path
 }
 
+/** Middle-truncates long paths: /very/long/.../project/dir */
+export function shortPath(path: string, max = 48): string {
+  const p = tildify(path)
+  if (p.length <= max) return p
+  const parts = p.split('/')
+  const tail = parts.slice(-2).join('/')
+  return `${parts[0] || '/'}${parts[0] ? '/' : ''}…/${tail}`
+}
+
 /** claude-opus-5-5[1m] -> opus */
 export function shortModel(model: string | null | undefined): string {
   if (!model) return 'claude'

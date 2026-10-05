@@ -207,7 +207,11 @@ export async function switchSession(
   })
   if (resume) {
     const events = await window.wraith.invoke('agent:history', resume.sessionId, project.path)
-    patch(project.id, () => ({ items: events.reduce(reduceItems, [] as ConvItem[]) }))
+    // A tool with no result in the transcript never finished (app quit, interrupt).
+    const items = events.reduce(reduceItems, [] as ConvItem[]).map((it) =>
+      it.kind === 'tool' && !it.result ? { ...it, result: { isError: true, text: 'Interrupted' } } : it
+    )
+    patch(project.id, () => ({ items }))
   }
   void refreshHistory(project)
 }

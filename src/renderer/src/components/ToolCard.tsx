@@ -71,7 +71,7 @@ function EditCard({ item, cwd }: { item: ToolItem; cwd: string }): React.JSX.Ele
   )
 }
 
-function BashCard({ item }: { item: ToolItem }): React.JSX.Element {
+function BashCard({ item, waiting }: { item: ToolItem; waiting?: boolean }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const out = item.result?.text ?? ''
   return (
@@ -80,7 +80,17 @@ function BashCard({ item }: { item: ToolItem }): React.JSX.Element {
         <TerminalIcon stroke="var(--ok)" />
         <span className="tool-name ok">Bash</span>
         <span className="tool-arg">{str(item.input.command)}</span>
-        <span className="tool-meta">{item.result ? (item.result.isError ? 'failed' : 'done') : 'running'}</span>
+        <span className="tool-meta">
+          {item.result
+            ? item.result.text === 'Interrupted'
+              ? 'interrupted'
+              : item.result.isError
+                ? 'failed'
+                : 'done'
+            : waiting
+              ? 'waiting'
+              : 'running'}
+        </span>
       </button>
       {open && out && <pre className="tool-output">{out}</pre>}
     </div>
@@ -142,7 +152,7 @@ function TodoCard({ item }: { item: ToolItem }): React.JSX.Element {
   )
 }
 
-export function ToolCard({ item, cwd }: { item: ToolItem; cwd: string }): React.JSX.Element {
+export function ToolCard({ item, cwd, waiting }: { item: ToolItem; cwd: string; waiting?: boolean }): React.JSX.Element {
   const i = item.input
   switch (item.name) {
     case 'Edit':
@@ -150,7 +160,7 @@ export function ToolCard({ item, cwd }: { item: ToolItem; cwd: string }): React.
     case 'Write':
       return <EditCard item={item} cwd={cwd} />
     case 'Bash':
-      return <BashCard item={item} />
+      return <BashCard item={item} waiting={waiting} />
     case 'Read': {
       const n = lineCount(item.result?.text)
       return (

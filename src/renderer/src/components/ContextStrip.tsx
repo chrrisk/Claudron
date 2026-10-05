@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Project } from '@shared/settings'
 import { useAgent } from '../store/agent'
 import { useSettings } from '../store/settings'
-import { shortModel, tildify } from '../lib/paths'
+import { shortModel, shortPath } from '../lib/paths'
 
 const MODE_LABEL = { ask: null, acceptEdits: 'accept edits', plan: 'plan', unleashed: null } as const
 
@@ -30,7 +30,7 @@ export function ContextStrip({ project }: { project: Project }): React.JSX.Eleme
   return (
     <div className="context-strip">
       <span className="fg" title={project.path}>
-        {tildify(project.path)}
+        {shortPath(project.path)}
       </span>
       {branch && <span className="chip">{branch}</span>}
       <span className="chip">{shortModel(conv?.model)}</span>

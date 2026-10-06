@@ -113,7 +113,6 @@ if (!app.requestSingleInstanceLock()) {
     mainWindow = createMainWindow(getSettings().theme)
     mainWindow.on('closed', () => (mainWindow = null))
     maybeSnapshot(mainWindow)
-    void checkForUpdates()
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {

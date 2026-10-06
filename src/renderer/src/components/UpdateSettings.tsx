@@ -24,7 +24,7 @@ export function UpdateSettings(): React.JSX.Element {
               ? `Update failed: ${state.message}`
               : state.kind === 'unsupported'
                 ? state.reason
-                : 'Pulls the newest release from GitHub and restarts into it.'
+                : 'Checks GitHub for a newer release. Nothing installs until you say so.'
 
   return (
     <>

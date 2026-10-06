@@ -21,7 +21,8 @@ function wire(): void {
   if (wired) return
   wired = true
   autoUpdater.autoDownload = true
-  autoUpdater.autoInstallOnAppQuit = true
+  // Manual only: nothing installs until the user clicks Restart and update.
+  autoUpdater.autoInstallOnAppQuit = false
   autoUpdater.on('checking-for-update', () => set({ kind: 'checking' }))
   autoUpdater.on('update-not-available', () => set({ kind: 'none' }))
   autoUpdater.on('update-available', (i) => set({ kind: 'downloading', version: i.version, percent: 0 }))

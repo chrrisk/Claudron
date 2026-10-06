@@ -51,6 +51,9 @@ export function playCreak(): void {
   lfo.stop(now + dur)
 }
 
+/** Quieter than the first cut; the partial levels below stay as designed. */
+const BELL_VOLUME = 0.4
+
 /** Inharmonic partials with long decays: a small church bell. */
 export function playBell(): void {
   const ac = audio()
@@ -70,7 +73,7 @@ export function playBell(): void {
     osc.frequency.value = base * ratio
     const g = ac.createGain()
     g.gain.setValueAtTime(0.0001, now)
-    g.gain.exponentialRampToValueAtTime(level, now + 0.008)
+    g.gain.exponentialRampToValueAtTime(level * BELL_VOLUME, now + 0.008)
     g.gain.exponentialRampToValueAtTime(0.0001, now + decay)
     osc.connect(g).connect(ac.destination)
     osc.start(now)

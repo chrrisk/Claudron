@@ -73,8 +73,8 @@ export function HostPicker({ onClose }: { onClose: () => void }): React.JSX.Elem
     <button key={h.id} className="host-row" onClick={() => open(h)}>
       <HostIcon label={h.label} />
       <span style={{ display: 'flex', flexDirection: 'column' }}>
-        <span className="host-name">{h.label}</span>
-        <span className="host-sub mono">{sshDisplay(h)}</span>
+        <span className="host-name veil">{h.label}</span>
+        <span className="host-sub mono veil">{sshDisplay(h)}</span>
       </span>
     </button>
   )
@@ -89,7 +89,7 @@ export function HostPicker({ onClose }: { onClose: () => void }): React.JSX.Elem
         HAUNT A NEW HOST
       </span>
       <input
-        className="pop-input"
+        className="pop-input veil"
         spellCheck={false}
         placeholder="user@host or ssh alias"
         value={target}
@@ -97,7 +97,7 @@ export function HostPicker({ onClose }: { onClose: () => void }): React.JSX.Elem
         onKeyDown={(e) => e.key === 'Enter' && add()}
       />
       <input
-        className="pop-input"
+        className="pop-input veil"
         spellCheck={false}
         placeholder="start folder (optional, e.g. ~/dev)"
         value={folder}

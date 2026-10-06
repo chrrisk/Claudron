@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { SecretMeta } from '@shared/ssh'
 import { useSettings } from '../store/settings'
+import { ConfirmButton } from './ConfirmButton'
 
 export function SecretsSettings(): React.JSX.Element {
   const hosts = useSettings((s) => s.settings.sshHosts)
@@ -44,9 +45,7 @@ export function SecretsSettings(): React.JSX.Element {
           <span className="mono" style={{ color: 'var(--muted)' }}>
             ••••••••
           </span>
-          <button className="link-btn" onClick={() => void window.claudron.invoke('secrets:remove', s.id).then(setItems)}>
-            Delete
-          </button>
+          <ConfirmButton label="Delete" onConfirm={() => void window.claudron.invoke('secrets:remove', s.id).then(setItems)} />
         </div>
       ))}
       <div className="secret-form">

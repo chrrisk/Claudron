@@ -1,6 +1,7 @@
 import { sshDisplay, type SshHost } from '@shared/ssh'
 import { useSettings } from '../store/settings'
 import { disposeTerminal } from '../lib/terminals'
+import { ConfirmButton } from './ConfirmButton'
 
 export function RemoteSettings(): React.JSX.Element {
   const settings = useSettings((s) => s.settings)
@@ -66,9 +67,7 @@ export function RemoteSettings(): React.JSX.Element {
             onBlur={(e) => setFolder(h, e.target.value.trim())}
           />
           <span />
-          <button className="link-btn" onClick={() => remove(h)}>
-            Remove
-          </button>
+          <ConfirmButton label="Remove" onConfirm={() => remove(h)} />
         </div>
       ))}
       {hosts.length === 0 && <span className="pop-hint">Saved hosts show up here after you open one.</span>}

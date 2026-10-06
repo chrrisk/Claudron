@@ -95,28 +95,27 @@
   flex: 1;
 }
 
+/* Overlays the terminal instead of taking layout space: collapsing it would resize the
+   terminal and pty, making Claude's UI reflow and jitter on the first keystroke. */
 .cli-banner {
-  flex: none;
-  position: relative;
-  z-index: 1;
-  padding: 20px 32px 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  padding: 20px 32px 16px;
   font-size: 13px;
   line-height: 1.6;
-  max-height: 160px;
-  overflow: hidden;
-  transition: opacity 0.4s ease;
-}
-
-/* Fade first, then collapse in one step: animating the height would refit the terminal and
-   resize the pty every frame, making Claude's UI jitter on the first keystroke. */
-.cli-banner.gone {
-  max-height: 0;
-  padding-top: 0;
-  opacity: 0;
+  background: var(--term);
   transition:
     opacity 0.4s ease,
-    max-height 0s 0.4s,
-    padding 0s 0.4s;
+    visibility 0s 0.4s;
+}
+
+.cli-banner.gone {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .banner-row {

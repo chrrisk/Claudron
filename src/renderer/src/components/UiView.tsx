@@ -5,7 +5,6 @@ import { useSettings } from '../store/settings'
 import { Composer } from './Composer'
 import { ContextStrip } from './ContextStrip'
 import { MessageList } from './MessageList'
-import { Sidebar } from './Sidebar'
 import { Cobweb, Fog, TaskToast } from './Haunting'
 import { RightRail } from './RightRail'
 
@@ -19,7 +18,7 @@ export function UiView({ project }: { project: Project }): React.JSX.Element {
 
   return (
     <div className="ui-mode">
-      <Sidebar project={project} />
+      {/* Sidebar.tsx is parked, not deleted: sessions and runner come back here later. */}
       <section className="conversation" aria-label="Conversation">
         <Cobweb />
         <Fog />

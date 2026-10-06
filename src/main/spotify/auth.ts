@@ -75,7 +75,7 @@ export async function login(clientId: string): Promise<Tokens> {
       const got = url.searchParams.get('code')
       const ok = !err && got && url.searchParams.get('state') === state
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-      res.end(ok ? page('Spotify connected', 'You can close this tab and go back to Wraith.') : page('Spotify login failed', err ?? 'State mismatch'))
+      res.end(ok ? page('Spotify connected', 'You can close this tab and go back to Claudron.') : page('Spotify login failed', err ?? 'State mismatch'))
       server.close()
       pending = null
       if (ok) resolve(got)

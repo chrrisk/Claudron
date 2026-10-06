@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { AgentEvent, PermissionDecision, PermissionRequest, SessionSummary } from '@shared/agent'
-import type { Project, WraithPermissionMode } from '@shared/settings'
+import type { Project, ClaudronPermissionMode } from '@shared/settings'
 
 export type ConvItem =
   | { kind: 'user'; id: string; text: string }
@@ -92,7 +92,7 @@ let wired = false
 export function wireAgentEvents(): void {
   if (wired) return
   wired = true
-  window.wraith.on('agent:event', ({ key, event }) => {
+  window.claudron.on('agent:event', ({ key, event }) => {
     switch (event.type) {
       case 'init':
         patch(key, () => ({ sessionId: event.sessionId, model: event.model }))
@@ -138,20 +138,20 @@ export function wireAgentEvents(): void {
   })
 }
 
-export async function ensureSession(project: Project, permissionMode: WraithPermissionMode): Promise<void> {
+export async function ensureSession(project: Project, permissionMode: ClaudronPermissionMode): Promise<void> {
   wireAgentEvents()
   if (conversation(project.id).opened) return
   patch(project.id, () => ({ opened: true }))
-  await window.wraith.invoke('agent:open', { key: project.id, cwd: project.path, permissionMode })
+  await window.claudron.invoke('agent:open', { key: project.id, cwd: project.path, permissionMode })
   void refreshHistory(project)
 }
 
 export async function refreshHistory(project: Project): Promise<void> {
-  const history = await window.wraith.invoke('agent:sessions', project.path)
+  const history = await window.claudron.invoke('agent:sessions', project.path)
   patch(project.id, () => ({ history }))
 }
 
-export async function sendPrompt(project: Project, text: string, permissionMode: WraithPermissionMode): Promise<void> {
+export async function sendPrompt(project: Project, text: string, permissionMode: ClaudronPermissionMode): Promise<void> {
   await ensureSession(project, permissionMode)
   const id = `local-${Date.now()}`
   patch(project.id, (c) => ({
@@ -161,7 +161,7 @@ export async function sendPrompt(project: Project, text: string, permissionMode:
     turnStartedAt: Date.now()
   }))
   try {
-    await window.wraith.invoke('agent:send', project.id, text)
+    await window.claudron.invoke('agent:send', project.id, text)
   } catch (err) {
     patch(project.id, (c) => ({
       busy: false,
@@ -172,17 +172,17 @@ export async function sendPrompt(project: Project, text: string, permissionMode:
 
 export function respond(key: string, requestId: string, decision: PermissionDecision): void {
   patch(key, (c) => ({ permissions: c.permissions.filter((p) => p.requestId !== requestId) }))
-  void window.wraith.invoke('agent:respond', key, requestId, decision)
+  void window.claudron.invoke('agent:respond', key, requestId, decision)
 }
 
 export function interrupt(key: string): void {
-  void window.wraith.invoke('agent:interrupt', key)
+  void window.claudron.invoke('agent:interrupt', key)
 }
 
 /** Starts a blank conversation, or resumes an old one when `resume` is given. */
 export async function switchSession(
   project: Project,
-  permissionMode: WraithPermissionMode,
+  permissionMode: ClaudronPermissionMode,
   resume?: SessionSummary
 ): Promise<void> {
   wireAgentEvents()
@@ -199,14 +199,14 @@ export async function switchSession(
       }
     }
   }))
-  await window.wraith.invoke('agent:open', {
+  await window.claudron.invoke('agent:open', {
     key: project.id,
     cwd: project.path,
     permissionMode,
     resume: resume?.sessionId
   })
   if (resume) {
-    const events = await window.wraith.invoke('agent:history', resume.sessionId, project.path)
+    const events = await window.claudron.invoke('agent:history', resume.sessionId, project.path)
     // A tool with no result in the transcript never finished (app quit, interrupt).
     const items = events.reduce(reduceItems, [] as ConvItem[]).map((it) =>
       it.kind === 'tool' && !it.result ? { ...it, result: { isError: true, text: 'Interrupted' } } : it

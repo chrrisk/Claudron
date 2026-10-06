@@ -13,7 +13,7 @@ export function loadShellEnv(): Promise<void> {
   if (process.platform === 'win32') return Promise.resolve()
   loaded ??= new Promise((resolve) => {
     const shell = process.env['SHELL'] || userInfo().shell || '/bin/zsh'
-    const marker = '__WRAITH_PATH__'
+    const marker = '__CLAUDRON_PATH__'
     execFile(
       shell,
       ['-ilc', `printf '${marker}%s${marker}' "$PATH"`],

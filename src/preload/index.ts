@@ -4,15 +4,15 @@ import {
   INVOKE_CHANNELS,
   SEND_CHANNELS,
   type EventMap,
-  type WraithBridge
+  type ClaudronBridge
 } from '@shared/ipc'
 
 function assertChannel(table: Record<string, true>, channel: string): void {
-  if (!Object.hasOwn(table, channel)) throw new Error(`wraith: unknown ipc channel "${channel}"`)
+  if (!Object.hasOwn(table, channel)) throw new Error(`claudron: unknown ipc channel "${channel}"`)
 }
 
-const bridge: WraithBridge = {
-  platform: process.platform as WraithBridge['platform'],
+const bridge: ClaudronBridge = {
+  platform: process.platform as ClaudronBridge['platform'],
 
   invoke(channel, ...args) {
     assertChannel(INVOKE_CHANNELS, channel)
@@ -32,4 +32,4 @@ const bridge: WraithBridge = {
   }
 }
 
-contextBridge.exposeInMainWorld('wraith', bridge)
+contextBridge.exposeInMainWorld('claudron', bridge)

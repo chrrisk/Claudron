@@ -1,4 +1,4 @@
-import type { WraithPermissionMode } from './settings'
+import type { ClaudronPermissionMode } from './settings'
 
 /**
  * The renderer never sees raw SDK messages. Main flattens them into this small
@@ -43,7 +43,7 @@ export interface AgentEnvelope {
 export interface AgentStartOptions {
   key: string
   cwd: string
-  permissionMode: WraithPermissionMode
+  permissionMode: ClaudronPermissionMode
   /** Session id to resume, if continuing an old conversation. */
   resume?: string
 }

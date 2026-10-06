@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { HauntLevel, Settings, SpotifyPresence, UiFont, WraithPermissionMode } from '@shared/settings'
+import type { HauntLevel, Settings, SpotifyPresence, UiFont, ClaudronPermissionMode } from '@shared/settings'
 import { soundDefaults } from '@shared/sounds'
 import { useSettings } from '../store/settings'
 import { useSpotify } from '../store/spotify'
@@ -29,7 +29,7 @@ const SPOTIFY: [SpotifyPresence, string][] = [
   ['card', 'Card']
 ]
 
-const PERMISSIONS: [WraithPermissionMode, string, string][] = [
+const PERMISSIONS: [ClaudronPermissionMode, string, string][] = [
   ['ask', 'Ask', 'Claude asks before running commands or editing files.'],
   ['acceptEdits', 'Accept edits', 'File edits go through. Commands still ask.'],
   ['plan', 'Plan', 'Read only. Claude proposes a plan before touching anything.'],
@@ -102,7 +102,7 @@ function SpotifySettings(): React.JSX.Element {
         />
       </label>
       {status === 'connected' && (
-        <button className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => void window.wraith.invoke('spotify:disconnect')}>
+        <button className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => void window.claudron.invoke('spotify:disconnect')}>
           Disconnect Spotify
         </button>
       )}
@@ -136,7 +136,7 @@ export function SettingsPopover({ onClose }: { onClose: () => void }): React.JSX
     }
   }, [onClose, warn])
 
-  const pickPermission = (mode: WraithPermissionMode): void => {
+  const pickPermission = (mode: ClaudronPermissionMode): void => {
     if (mode === 'unleashed' && !settings.unleashedWarned) {
       setWarn(true)
       return
@@ -159,7 +159,7 @@ export function SettingsPopover({ onClose }: { onClose: () => void }): React.JSX
           <span className="pop-heading">PERMISSIONS</span>
           <Segmented
             label="Permission mode"
-            options={PERMISSIONS.map(([v, l]) => [v, l] as [WraithPermissionMode, string])}
+            options={PERMISSIONS.map(([v, l]) => [v, l] as [ClaudronPermissionMode, string])}
             value={settings.permissionMode}
             onPick={pickPermission}
             cols={2}

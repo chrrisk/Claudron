@@ -1,7 +1,7 @@
 import { Terminal, type ITheme } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebglAddon } from '@xterm/addon-webgl'
-import type { Theme, WraithPermissionMode } from '@shared/settings'
+import type { Theme, ClaudronPermissionMode } from '@shared/settings'
 import { MONO, THEMES } from '../themes'
 
 /**
@@ -66,7 +66,7 @@ export function xtermTheme(theme: Theme): ITheme {
 function wireIpc(): void {
   if (wired) return
   wired = true
-  window.wraith.on('pty:data', ({ id, data }) => {
+  window.claudron.on('pty:data', ({ id, data }) => {
     const e = entries.get(id)
     if (!e) return
     e.term.write(data)
@@ -74,7 +74,7 @@ function wireIpc(): void {
     e.lastOutputAt = Date.now()
     if (wasQuiet) notify()
   })
-  window.wraith.on('pty:exit', ({ id, exitCode }) => {
+  window.claudron.on('pty:exit', ({ id, exitCode }) => {
     const e = entries.get(id)
     if (!e) return
     e.status = 'exited'
@@ -112,7 +112,7 @@ export function ensureTerminal(id: string, cwd: string, theme: Theme): TermEntry
   const entry = e
   entries.set(id, entry)
 
-  // ctrl+space is Wraith's play/pause hotkey; keep it from reaching claude as a NUL byte.
+  // ctrl+space is Claudron's play/pause hotkey; keep it from reaching claude as a NUL byte.
   term.attachCustomKeyEventHandler((ev) => {
     if (ev.ctrlKey && !ev.metaKey && !ev.altKey && ev.code === 'Space') {
       if (ev.type === 'keydown') hotkeys.ctrlSpace?.()
@@ -126,19 +126,19 @@ export function ensureTerminal(id: string, cwd: string, theme: Theme): TermEntry
       if (data === '\r') void startClaude(entry, currentPermissionMode)
       return
     }
-    window.wraith.send('pty:write', id, data)
+    window.claudron.send('pty:write', id, data)
   })
-  term.onResize(({ cols, rows }) => window.wraith.send('pty:resize', id, cols, rows))
+  term.onResize(({ cols, rows }) => window.claudron.send('pty:resize', id, cols, rows))
   return entry
 }
 
-let currentPermissionMode: WraithPermissionMode = 'ask'
+let currentPermissionMode: ClaudronPermissionMode = 'ask'
 
 /** Attach the terminal to a host element. First attach opens xterm and spawns claude. */
 export async function attachTerminal(
   entry: TermEntry,
   host: HTMLElement,
-  permissionMode: WraithPermissionMode,
+  permissionMode: ClaudronPermissionMode,
   beforeStart?: (entry: TermEntry) => void | Promise<void>
 ): Promise<void> {
   currentPermissionMode = permissionMode
@@ -174,12 +174,12 @@ export function safeFit(entry: TermEntry): void {
 
 async function startClaude(
   entry: TermEntry,
-  permissionMode: WraithPermissionMode,
+  permissionMode: ClaudronPermissionMode,
   continueSession = false
 ): Promise<void> {
   entry.status = 'starting'
   notify()
-  const res = await window.wraith.invoke('pty:spawn', {
+  const res = await window.claudron.invoke('pty:spawn', {
     id: entry.id,
     cwd: entry.cwd,
     cols: entry.term.cols,
@@ -202,24 +202,24 @@ async function startClaude(
  * Kill and restart claude in place, e.g. after the permission mode changes.
  * --continue brings the same conversation back, so nothing is lost.
  */
-export async function restartTerminal(id: string, permissionMode: WraithPermissionMode): Promise<void> {
+export async function restartTerminal(id: string, permissionMode: ClaudronPermissionMode): Promise<void> {
   const e = entries.get(id)
   if (!e || e.status === 'idle') return
   currentPermissionMode = permissionMode
-  window.wraith.send('pty:kill', id)
-  e.term.write('\r\n\x1b[2m[wraith: restarting claude with the new permission mode]\x1b[0m\r\n')
+  window.claudron.send('pty:kill', id)
+  e.term.write('\r\n\x1b[2m[claudron: restarting claude with the new permission mode]\x1b[0m\r\n')
   await startClaude(e, permissionMode, true)
 }
 
 /** Restart every running terminal (permission mode is global). */
-export async function restartAllTerminals(permissionMode: WraithPermissionMode): Promise<void> {
+export async function restartAllTerminals(permissionMode: ClaudronPermissionMode): Promise<void> {
   await Promise.all([...entries.keys()].map((id) => restartTerminal(id, permissionMode)))
 }
 
 export function disposeTerminal(id: string): void {
   const e = entries.get(id)
   if (!e) return
-  window.wraith.send('pty:kill', id)
+  window.claudron.send('pty:kill', id)
   e.term.dispose()
   e.element.remove()
   entries.delete(id)

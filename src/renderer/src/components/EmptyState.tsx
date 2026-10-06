@@ -7,7 +7,7 @@ export function EmptyState(): React.JSX.Element {
   const spooky = settings.haunt !== 'subtle'
 
   const open = async (): Promise<void> => {
-    const project = await window.wraith.invoke('projects:pick')
+    const project = await window.claudron.invoke('projects:pick')
     if (!project) return
     update({ projects: [...settings.projects, project], activeProjectId: project.id })
   }

@@ -1,8 +1,8 @@
-import type { WraithBridge } from '../shared/ipc'
+import type { ClaudronBridge } from '../shared/ipc'
 
 declare global {
   interface Window {
-    wraith: WraithBridge
+    claudron: ClaudronBridge
   }
 }
 

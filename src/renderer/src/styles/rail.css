@@ -48,23 +48,23 @@
   transition: y 0.8s ease;
 }
 
-@keyframes wraithBubble {
+@keyframes claudronBubble {
   0% { transform: translateY(0); opacity: 0.9; }
   100% { transform: translateY(-8px); opacity: 0; }
 }
 
-@keyframes wraithDrip {
+@keyframes claudronDrip {
   0%, 100% { transform: scaleY(1); }
   50% { transform: scaleY(1.15); }
 }
 
 .cauldron-svg .bubble {
-  animation: wraithBubble 1.8s ease-in infinite;
+  animation: claudronBubble 1.8s ease-in infinite;
   transform-box: fill-box;
 }
 
 .cauldron-svg .drip {
-  animation: wraithDrip 2.4s ease-in-out infinite;
+  animation: claudronDrip 2.4s ease-in-out infinite;
   transform-box: fill-box;
   transform-origin: top;
 }

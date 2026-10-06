@@ -9,7 +9,7 @@ export interface UsageReading {
   percent: number
   /** Epoch ms when the window resets, if reported. */
   resetsAt: number | null
-  /** Epoch ms when Wraith received the reading. */
+  /** Epoch ms when Claudron received the reading. */
   observedAt: number
   source: UsageSource
 }

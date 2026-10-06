@@ -4,12 +4,12 @@ import type { SpotifyCommand, SpotifyState } from '@shared/spotify'
 export const useSpotify = create<{ state: SpotifyState }>(() => ({ state: { status: 'disconnected' } }))
 
 export async function hydrateSpotify(): Promise<void> {
-  useSpotify.setState({ state: await window.wraith.invoke('spotify:get') })
-  window.wraith.on('spotify:state', (state) => useSpotify.setState({ state }))
+  useSpotify.setState({ state: await window.claudron.invoke('spotify:get') })
+  window.claudron.on('spotify:state', (state) => useSpotify.setState({ state }))
 }
 
 export function spotify(cmd: SpotifyCommand): void {
-  void window.wraith.invoke('spotify:command', cmd)
+  void window.claudron.invoke('spotify:command', cmd)
 }
 
 /** Progress ticks locally between the 3s polls while playing. */

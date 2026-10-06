@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Wraith's tap into a Claude Code session running in CLI mode.
+// Claudron's tap into a Claude Code session running in CLI mode.
 //
-//   wraith-tap statusline <dir> <id>   status line command: saves Claude Code's
+//   claudron-tap statusline <dir> <id>   status line command: saves Claude Code's
 //                                      status JSON, then runs the user's own
 //                                      status line (if any) so nothing is lost
-//   wraith-tap event <dir> <id> <kind> hook command: appends one event line
+//   claudron-tap event <dir> <id> <kind> hook command: appends one event line
 //
 // Runs under Electron with ELECTRON_RUN_AS_NODE=1, so it needs no Node install.
 'use strict'
@@ -38,7 +38,7 @@ if (mode === 'statusline') {
     fs.writeFileSync(file + '.tmp', input)
     fs.renameSync(file + '.tmp', file)
   } catch {}
-  const user = process.env.WRAITH_USER_STATUSLINE
+  const user = process.env.CLAUDRON_USER_STATUSLINE
   if (user) {
     const r = spawnSync(user, { input, shell: true, encoding: 'utf8', timeout: 4000 })
     if (r.stdout) process.stdout.write(r.stdout)

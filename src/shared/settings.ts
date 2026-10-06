@@ -3,8 +3,8 @@ export type InterfaceMode = 'ui' | 'cli'
 export type HauntLevel = 'subtle' | 'spooky' | 'full'
 export type UiFont = 'chakra' | 'excali'
 export type SpotifyPresence = 'off' | 'pill' | 'card'
-/** Wraith's names for Claude Code permission modes. `unleashed` skips every prompt. */
-export type WraithPermissionMode = 'ask' | 'acceptEdits' | 'plan' | 'unleashed'
+/** Claudron's names for Claude Code permission modes. `unleashed` skips every prompt. */
+export type ClaudronPermissionMode = 'ask' | 'acceptEdits' | 'plan' | 'unleashed'
 
 export interface Project {
   id: string
@@ -21,7 +21,7 @@ export interface Settings {
   doorSound: boolean | null
   bellSound: boolean | null
   spotify: SpotifyPresence
-  permissionMode: WraithPermissionMode
+  permissionMode: ClaudronPermissionMode
   /** set once the user has seen the unleashed warning */
   unleashedWarned: boolean
   projects: Project[]

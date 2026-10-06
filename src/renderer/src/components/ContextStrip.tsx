@@ -14,7 +14,7 @@ export function ContextStrip({ project }: { project: Project }): React.JSX.Eleme
   useEffect(() => {
     let live = true
     const load = (): void => {
-      void window.wraith.invoke('projects:branch', project.path).then((b) => live && setBranch(b))
+      void window.claudron.invoke('projects:branch', project.path).then((b) => live && setBranch(b))
     }
     load()
     const iv = setInterval(load, 15000)

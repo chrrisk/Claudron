@@ -98,7 +98,7 @@ export const EVENT_CHANNELS: Record<keyof EventMap, true> = {
 
 export type Unsubscribe = () => void
 
-export interface WraithBridge {
+export interface ClaudronBridge {
   platform: 'darwin' | 'win32' | 'linux'
   invoke<K extends keyof InvokeMap>(channel: K, ...args: InvokeMap[K]['args']): Promise<InvokeMap[K]['result']>
   send<K extends keyof SendMap>(channel: K, ...args: SendMap[K]): void

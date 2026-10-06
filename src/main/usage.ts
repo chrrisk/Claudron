@@ -147,15 +147,15 @@ export function stopUsage(): void {
 
 // ---------------------------------------------------------------------------
 // Source 3: CLI mode. Each pty gets --settings with a status line command and a
-// few hooks pointing at resources/wraith-tap.cjs, which drops what Claude Code
+// few hooks pointing at resources/claudron-tap.cjs, which drops what Claude Code
 // hands it into a folder we poll.
 
 const tapDir = (): string => join(app.getPath('userData'), 'tap')
 
 function tapScript(): string {
   return app.isPackaged
-    ? join(process.resourcesPath, 'wraith-tap.cjs')
-    : join(app.getAppPath(), 'resources', 'wraith-tap.cjs')
+    ? join(process.resourcesPath, 'claudron-tap.cjs')
+    : join(app.getAppPath(), 'resources', 'claudron-tap.cjs')
 }
 
 /** Claude Code runs these through a POSIX shell (Git Bash on Windows), so forward slashes and env prefixes work everywhere. */
@@ -203,7 +203,7 @@ export function installCliTap(): void {
 
 function userEnv(): Record<string, string> {
   const cmd = userStatusLine()
-  return cmd ? { WRAITH_USER_STATUSLINE: cmd } : {}
+  return cmd ? { CLAUDRON_USER_STATUSLINE: cmd } : {}
 }
 
 let tapTimer: ReturnType<typeof setInterval> | null = null

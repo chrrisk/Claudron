@@ -14,7 +14,7 @@ interface Session {
 
 const sessions = new Map<string, Session>()
 
-// Markers a parent Claude Code session leaves in the environment. If Wraith was
+// Markers a parent Claude Code session leaves in the environment. If Claudron was
 // launched from inside one, passing them on makes the child think it is nested.
 const INHERITED_SESSION_VARS = ['CLAUDECODE', 'CLAUDE_CODE_CHILD_SESSION', 'CLAUDE_CODE_ENTRYPOINT', 'CLAUDE_CODE_SSE_PORT']
 
@@ -55,7 +55,7 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
   if (!claude) {
     return {
       ok: false,
-      error: 'Could not find the claude binary. Install Claude Code (https://claude.com/claude-code) and restart Wraith.'
+      error: 'Could not find the claude binary. Install Claude Code (https://claude.com/claude-code) and restart Claudron.'
     }
   }
 
@@ -75,7 +75,7 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
       cols: Math.max(opts.cols, 2),
       rows: Math.max(opts.rows, 2),
       cwd: opts.cwd,
-      env: childEnv({ ...extraEnv, TERM: 'xterm-256color', COLORTERM: 'truecolor', TERM_PROGRAM: 'wraith' }),
+      env: childEnv({ ...extraEnv, TERM: 'xterm-256color', COLORTERM: 'truecolor', TERM_PROGRAM: 'claudron' }),
       useConpty: true
     })
   } catch (err) {

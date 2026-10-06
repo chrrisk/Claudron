@@ -1,7 +1,7 @@
 let home = ''
 
 export async function loadAppInfo(): Promise<void> {
-  const info = await window.wraith.invoke('app:info')
+  const info = await window.claudron.invoke('app:info')
   home = info.home
 }
 

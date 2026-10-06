@@ -21,14 +21,14 @@ export function PumpkinBanner({ where, dismissed }: { where: string; dismissed: 
         <div className="banner-row">
           <pre className="pumpkin">{PUMPKIN}</pre>
           <div className="banner-text">
-            <span className="banner-title">W R A I T H</span>
+            <span className="banner-title">C L A U D R O N</span>
             <span className="muted">claude · {where}</span>
             {full && <span className="violet">/\^._.^/\   the bats are out tonight</span>}
           </div>
         </div>
       ) : (
         <div className="muted">
-          wraith ▸ claude &nbsp; <span className="fg">{where}</span>
+          claudron ▸ claude &nbsp; <span className="fg">{where}</span>
         </div>
       )}
     </div>

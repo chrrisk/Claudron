@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Project, WraithPermissionMode } from '@shared/settings'
+import type { Project, ClaudronPermissionMode } from '@shared/settings'
 import { interrupt, sendPrompt, useAgent } from '../store/agent'
 import { useSettings } from '../store/settings'
 import { useHaunt } from '../lib/haunt'
 import { SendIcon, StopIcon } from './icons'
 
 // shift+tab cycles like the CLI does. Unleashed is never one keystroke away.
-const CYCLE: WraithPermissionMode[] = ['ask', 'acceptEdits', 'plan']
+const CYCLE: ClaudronPermissionMode[] = ['ask', 'acceptEdits', 'plan']
 
 export function Composer({ project }: { project: Project }): React.JSX.Element {
   const [text, setText] = useState('')

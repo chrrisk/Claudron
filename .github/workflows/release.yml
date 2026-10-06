@@ -45,7 +45,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CERT_P12_BASE64 != '' }}
       - uses: actions/upload-artifact@v4
         with:
-          name: wraith-${{ matrix.os }}
+          name: claudron-${{ matrix.os }}
           path: |
             release/*/*.dmg
             release/*/*.exe

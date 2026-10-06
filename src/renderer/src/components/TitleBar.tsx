@@ -15,7 +15,7 @@ export function TitleBar({ settingsOpen, onToggleSettings, rightSlot }: Props): 
   const isUi = settings.mode === 'ui'
 
   const openProject = async (): Promise<void> => {
-    const project = await window.wraith.invoke('projects:pick')
+    const project = await window.claudron.invoke('projects:pick')
     if (!project) return
     const existing = settings.projects.find((p) => p.path === project.path)
     if (existing) {
@@ -36,7 +36,7 @@ export function TitleBar({ settingsOpen, onToggleSettings, rightSlot }: Props): 
     <header className="titlebar">
       <div className="brand">
         <LogoMark />
-        <span className="brand-name">WRAITH</span>
+        <span className="brand-name">CLAUDRON</span>
       </div>
 
       <div className="tabs" role="tablist" aria-label="Projects">

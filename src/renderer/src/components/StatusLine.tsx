@@ -41,7 +41,7 @@ export function StatusLine({ project }: { project: Project }): React.JSX.Element
 
   return (
     <div className="statusline" role="status">
-      <span className="seg brand">WRAITH</span>
+      <span className="seg brand">CLAUDRON</span>
       {unleashed && <span className="seg unleashed">UNLEASHED</span>}
       <span className="seg state">
         {spin} <span className="fg">{label}</span>

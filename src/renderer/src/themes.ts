@@ -75,7 +75,7 @@ export function themeCss(): string {
 
 export function installThemeVars(): void {
   const el = document.createElement('style')
-  el.id = 'wraith-theme-vars'
+  el.id = 'claudron-theme-vars'
   el.textContent = themeCss()
   document.head.prepend(el)
 }

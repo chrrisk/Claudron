@@ -32,13 +32,13 @@ export function CauldronPot({ percent, label }: { percent: number | null; label:
   return (
     <svg width="236" height="158" viewBox="0 0 200 134" role="img" aria-label={label} className="cauldron-svg">
       <defs>
-        <clipPath id="wraith-pot">
+        <clipPath id="claudron-pot">
           <path d={POT} />
         </clipPath>
       </defs>
       <path d={POT} fill="var(--pot)" />
       {!empty && (
-        <g clipPath="url(#wraith-pot)">
+        <g clipPath="url(#claudron-pot)">
           <rect x="0" y={liqY} width="200" height="140" fill={color} opacity="0.9" className="liquid" />
           <ellipse cx="100" cy={liqY} rx="80" ry="5" fill="var(--liquid-top)" opacity="0.5" />
         </g>
@@ -129,7 +129,7 @@ export function Cauldron(): React.JSX.Element {
           : plansApply === false
             ? 'Plan limits only apply to claude.ai subscriptions.'
             : 'No reading from Claude Code yet.'}
-        <button className="link-btn" onClick={() => void window.wraith.invoke('usage:refresh')}>
+        <button className="link-btn" onClick={() => void window.claudron.invoke('usage:refresh')}>
           refresh
         </button>
       </div>

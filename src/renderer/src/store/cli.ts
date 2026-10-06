@@ -26,8 +26,8 @@ function patch(id: string, p: Partial<CliState>): void {
 }
 
 export function wireCliEvents(): void {
-  window.wraith.on('cli:status', ({ id, model, contextPct }) => patch(id, { model, contextPct }))
-  window.wraith.on('cli:event', ({ id, kind, at }) => {
+  window.claudron.on('cli:status', ({ id, model, contextPct }) => patch(id, { model, contextPct }))
+  window.claudron.on('cli:event', ({ id, kind, at }) => {
     const cur = useCli.getState().sessions[id] ?? blank
     switch (kind) {
       case 'prompt':

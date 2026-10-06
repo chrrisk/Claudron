@@ -1,18 +1,20 @@
 <p align="center">
-  <img src="build/icon.png" width="96" alt="Wraith icon">
+  <img src="build/icon.png" width="96" alt="Claudron icon">
 </p>
 
-<h1 align="center">Wraith</h1>
+<h1 align="center">Claudron</h1>
 
 <p align="center">
   A haunted desktop shell for Claude Code. macOS and Windows.
 </p>
 
-![Wraith in UI mode, with Claude waiting at the door to run a command](docs/screenshots/ui-dark.png)
+![Claudron in UI mode, with Claude waiting at the door to run a command](docs/screenshots/ui-dark.png)
 
-Wraith wraps the real `claude` you already use. Flip between a proper chat UI with diffs and permission cards, and the plain terminal you know. Everything runs on your machine with your existing Claude login. There is no Wraith account and no Wraith server.
+Claudron wraps the real `claude` you already use. Flip between a proper chat UI with diffs and permission cards, and the plain terminal you know. Everything runs on your machine with your existing Claude login. There is no Claudron account and no Claudron server.
 
 It is also a little bit spooky. You can turn that down.
+
+The name is Claude plus cauldron, which is also where your usage limits bubble away.
 
 ## What you get
 
@@ -34,12 +36,12 @@ It is also a little bit spooky. You can turn that down.
 
 Grab a build from [Releases](../../releases):
 
-- **macOS:** `Wraith-x.y.z-mac-arm64.dmg` for Apple silicon, `-mac-x64.dmg` for Intel.
-- **Windows:** `Wraith-x.y.z-win-x64-setup.exe`.
+- **macOS:** `Claudron-x.y.z-mac-arm64.dmg` for Apple silicon, `-mac-x64.dmg` for Intel.
+- **Windows:** `Claudron-x.y.z-win-x64-setup.exe`.
 
-You need to be logged in to Claude Code once (`claude` then `/login`). Wraith uses the same credentials.
+You need to be logged in to Claude Code once (`claude` then `/login`). Claudron uses the same credentials.
 
-The builds are not code signed yet. On macOS, if Gatekeeper says the app is damaged, run `xattr -cr /Applications/Wraith.app` once. On Windows, SmartScreen will ask you to confirm.
+The builds are not code signed yet. On macOS, if Gatekeeper says the app is damaged, run `xattr -cr /Applications/Claudron.app` once. On Windows, SmartScreen will ask you to confirm.
 
 ### Build it yourself
 
@@ -66,27 +68,27 @@ A reading older than ten minutes counts as no reading. If you use an API key, Be
 
 ## How CLI mode hooks in
 
-Wraith starts `claude` with an extra `--settings` argument that adds:
+Claudron starts `claude` with an extra `--settings` argument that adds:
 
 - a status line command, which saves the JSON Claude Code hands it (model, context, rate limits)
-- a few hooks (`UserPromptSubmit`, `Notification`, `PostToolUse`, `PermissionDenied`, `Stop`) so Wraith knows when Claude is working or waiting on you
+- a few hooks (`UserPromptSubmit`, `Notification`, `PostToolUse`, `PermissionDenied`, `Stop`) so Claudron knows when Claude is working or waiting on you
 
-Both run a tiny script, `resources/wraith-tap.cjs`, using Wraith's own Electron binary, so you do not need Node installed. If you already have a custom status line in `~/.claude/settings.json`, it still runs and its output goes through untouched. Nothing in your settings files is modified.
+Both run a tiny script, `resources/claudron-tap.cjs`, using Claudron's own Electron binary, so you do not need Node installed. If you already have a custom status line in `~/.claude/settings.json`, it still runs and its output goes through untouched. Nothing in your settings files is modified.
 
 Changing the permission mode while a terminal is open restarts `claude` with `--continue`, so you land back in the same conversation.
 
 ## Spotify setup
 
-Spotify needs an app registered to your account. It takes two minutes and there is no secret involved (Wraith uses PKCE).
+Spotify needs an app registered to your account. It takes two minutes and there is no secret involved (Claudron uses PKCE).
 
 1. Go to [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) and create an app.
 2. Add this redirect URI exactly: `http://127.0.0.1:43117/callback`
 3. Tick **Web API**, save, and copy the client id.
-4. In Wraith, open settings (the gear), paste it under Spotify presence, then hit **Connect Spotify**.
+4. In Claudron, open settings (the gear), paste it under Spotify presence, then hit **Connect Spotify**.
 
 Tokens are encrypted with your OS keychain through Electron's `safeStorage`. Play, pause, skip and volume need Spotify Premium; free accounts still get now playing. You can pin your own spooky playlist in settings, otherwise the button searches for one.
 
-If you build Wraith for other people, set `MAIN_VITE_SPOTIFY_CLIENT_ID` at build time (see `.env.example`) so they can skip steps 1 to 3.
+If you build Claudron for other people, set `MAIN_VITE_SPOTIFY_CLIENT_ID` at build time (see `.env.example`) so they can skip steps 1 to 3.
 
 ## Settings
 
@@ -100,7 +102,7 @@ If you build Wraith for other people, set `MAIN_VITE_SPOTIFY_CLIENT_ID` at build
 | Sound effects | creaky door on prompts, bell on finish | follow haunt level |
 | Spotify | off, pill, card | card |
 
-**Unleashed** is `--dangerously-skip-permissions`. Claude runs anything without asking. Wraith warns you the first time and shows a red `UNLEASHED` badge for as long as it is on.
+**Unleashed** is `--dangerously-skip-permissions`. Claude runs anything without asking. Claudron warns you the first time and shows a red `UNLEASHED` badge for as long as it is on.
 
 Shortcuts: `shift+tab` cycles ask, accept edits and plan in the composer. `esc` stops a running turn. `ctrl+space` plays or pauses music from inside the terminal.
 
@@ -121,13 +123,13 @@ src/
   preload/    the typed IPC bridge, nothing else
   renderer/   React app
   shared/     types and pure logic used by both sides (diffs, copy, usage moods)
-resources/    wraith-tap.cjs, run by Claude Code in CLI mode
+resources/    claudron-tap.cjs, run by Claude Code in CLI mode
 docs/         design spec and the HTML mockups everything is built from
 ```
 
 Every IPC channel is declared once in `src/shared/ipc.ts`. Main, preload and renderer are all typed from that file, and preload rejects any channel that is not in it.
 
-A handy trick while working on the UI: `WRAITH_SNAPSHOT=shot.png npm run dev` saves a screenshot of the window after it settles and quits. `WRAITH_USER_DATA=/tmp/wraith` points it at a throwaway profile.
+A handy trick while working on the UI: `CLAUDRON_SNAPSHOT=shot.png npm run dev` saves a screenshot of the window after it settles and quits. `CLAUDRON_USER_DATA=/tmp/claudron` points it at a throwaway profile.
 
 ## Known rough edges
 
@@ -139,3 +141,5 @@ A handy trick while working on the UI: `WRAITH_SNAPSHOT=shot.png npm run dev` sa
 ## License
 
 MIT. Excalifont is by the Excalidraw team under the SIL Open Font License. Chakra Petch and JetBrains Mono are also OFL.
+
+Claudron is an independent fan project. It is not made, endorsed or supported by Anthropic. Claude and Claude Code are trademarks of Anthropic.

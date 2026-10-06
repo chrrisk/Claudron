@@ -1,5 +1,5 @@
-appId: dev.wraith.app
-productName: Wraith
+appId: dev.claudron.app
+productName: Claudron
 copyright: Copyright © 2026 chrrisk
 directories:
   buildResources: build
@@ -9,8 +9,8 @@ files:
   - package.json
   - '!**/*.map'
 extraResources:
-  - from: resources/wraith-tap.cjs
-    to: wraith-tap.cjs
+  - from: resources/claudron-tap.cjs
+    to: claudron-tap.cjs
 asar: true
 asarUnpack:
   # native addon + spawn-helper, and the Claude Code binary the Agent SDK runs
@@ -45,7 +45,7 @@ nsis:
   perMachine: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
-  shortcutName: Wraith
+  shortcutName: Claudron
 
 linux:
   target: [AppImage]

@@ -1,10 +1,10 @@
 /* Keyframes lifted from docs/mockups/Main.dc.html. */
-@keyframes wraithFog {
+@keyframes claudronFog {
   0% { transform: translateX(-4%); }
   50% { transform: translateX(4%); }
   100% { transform: translateX(-4%); }
 }
-@keyframes wraithFlicker {
+@keyframes claudronFlicker {
   0%, 100% { opacity: 1; }
   12% { opacity: 0.7; }
   20% { opacity: 0.95; }
@@ -13,38 +13,38 @@
   63% { opacity: 0.78; }
   80% { opacity: 0.92; }
 }
-@keyframes wraithBat {
+@keyframes claudronBat {
   0%, 100% { transform: translate(0, 0) scaleY(1); }
   25% { transform: translate(-18px, -8px) scaleY(0.7); }
   50% { transform: translate(-36px, -2px) scaleY(1); }
   75% { transform: translate(-18px, 6px) scaleY(0.7); }
 }
-@keyframes wraithGlitch {
+@keyframes claudronGlitch {
   0%, 90%, 100% { transform: none; }
   92% { transform: translate(3px, -1px); }
   94% { transform: translate(-3px, 1px); }
   96% { transform: translate(2px, 0); }
   98% { transform: translate(-1px, 1px); }
 }
-@keyframes wraithCursor {
+@keyframes claudronCursor {
   0%, 100% { opacity: 1; }
   40% { opacity: 0.5; }
   60% { opacity: 0.9; }
   75% { opacity: 0.65; }
 }
 /* The mockup's flyby is tuned for a 1280px window; this one crosses any width. */
-@keyframes wraithFlyby {
+@keyframes claudronFlyby {
   0% { transform: translate(-80px, 0); }
   25% { transform: translate(25vw, 10px); }
   50% { transform: translate(50vw, -4px); }
   75% { transform: translate(75vw, 9px); }
   100% { transform: translate(calc(100vw + 80px), 0); }
 }
-@keyframes wraithFlap {
+@keyframes claudronFlap {
   from { transform: scaleY(1); }
   to { transform: scaleY(0.45); }
 }
-@keyframes wraithToastIn {
+@keyframes claudronToastIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
@@ -52,7 +52,7 @@
 /* Candle flicker on glows, spooky and up. */
 :root[data-haunt='spooky'] [data-anim='flicker'],
 :root[data-haunt='full'] [data-anim='flicker'] {
-  animation: wraithFlicker 3.2s linear infinite;
+  animation: claudronFlicker 3.2s linear infinite;
 }
 
 .fog {
@@ -66,7 +66,7 @@
   background: radial-gradient(ellipse 38% 55% at 22% 85%, var(--fog), transparent 70%),
     radial-gradient(ellipse 42% 50% at 70% 95%, var(--fog), transparent 70%),
     radial-gradient(ellipse 30% 40% at 48% 100%, var(--fog), transparent 70%);
-  animation: wraithFog 18s ease-in-out infinite;
+  animation: claudronFog 18s ease-in-out infinite;
 }
 
 .cli .fog {
@@ -90,7 +90,7 @@
 :root[data-haunt='full'] .error-line {
   color: var(--ok);
   text-shadow: 2px 0 rgba(255, 60, 110, 0.55), -2px 0 rgba(60, 255, 200, 0.45);
-  animation: wraithGlitch 4s steps(1) infinite;
+  animation: claudronGlitch 4s steps(1) infinite;
 }
 
 .task-toast {
@@ -107,7 +107,7 @@
   background: var(--panel);
   font-size: 13px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  animation: wraithToastIn 0.25s ease-out;
+  animation: claudronToastIn 0.25s ease-out;
 }
 
 .task-toast b {
@@ -134,12 +134,12 @@
 .bat-lane .flyer {
   position: absolute;
   left: 0;
-  animation: wraithFlyby 3.2s linear both;
+  animation: claudronFlyby 3.2s linear both;
 }
 
 .bat-lane .flap {
   display: block;
-  animation: wraithFlap 0.2s ease-in-out infinite alternate;
+  animation: claudronFlap 0.2s ease-in-out infinite alternate;
 }
 
 @media (prefers-reduced-motion: reduce) {

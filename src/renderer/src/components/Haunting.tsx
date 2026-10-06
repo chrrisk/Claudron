@@ -81,9 +81,9 @@ export function TaskToast({ projectKey }: { projectKey: string }): React.JSX.Ele
       </div>
       {full && !still && (
         <>
-          <Bat width={34} className="toast-bat" data-anim="bat" style={{ left: 330, bottom: 196, animation: 'wraithBat 2.8s ease-in-out infinite' }} />
-          <Bat width={24} className="toast-bat" data-anim="bat" style={{ left: 380, bottom: 222, animation: 'wraithBat 2.2s ease-in-out infinite 0.4s' }} />
-          <Bat width={18} className="toast-bat" data-anim="bat" style={{ left: 300, bottom: 236, opacity: 0.7, animation: 'wraithBat 2.5s ease-in-out infinite 0.9s' }} />
+          <Bat width={34} className="toast-bat" data-anim="bat" style={{ left: 330, bottom: 196, animation: 'claudronBat 2.8s ease-in-out infinite' }} />
+          <Bat width={24} className="toast-bat" data-anim="bat" style={{ left: 380, bottom: 222, animation: 'claudronBat 2.2s ease-in-out infinite 0.4s' }} />
+          <Bat width={18} className="toast-bat" data-anim="bat" style={{ left: 300, bottom: 236, opacity: 0.7, animation: 'claudronBat 2.5s ease-in-out infinite 0.9s' }} />
         </>
       )}
     </>

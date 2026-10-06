@@ -6,6 +6,6 @@ export const useUsage = create<{ usage: UsageSnapshot }>(() => ({
 }))
 
 export async function hydrateUsage(): Promise<void> {
-  useUsage.setState({ usage: await window.wraith.invoke('usage:get') })
-  window.wraith.on('usage:changed', (usage) => useUsage.setState({ usage }))
+  useUsage.setState({ usage: await window.claudron.invoke('usage:get') })
+  window.claudron.on('usage:changed', (usage) => useUsage.setState({ usage }))
 }

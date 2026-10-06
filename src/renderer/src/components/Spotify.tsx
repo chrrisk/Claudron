@@ -62,7 +62,7 @@ function NotConnected(): React.JSX.Element {
         <button
           className="primary-btn"
           disabled={s.status === 'connecting'}
-          onClick={() => void window.wraith.invoke('spotify:connect')}
+          onClick={() => void window.claudron.invoke('spotify:connect')}
         >
           {s.status === 'connecting' ? 'Waiting for the browser…' : 'Connect Spotify'}
         </button>

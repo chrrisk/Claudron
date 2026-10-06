@@ -21,7 +21,7 @@ import { getUsage, installCliTap, onCliEvent, refreshUsage, startUsagePolling, s
 import { applyWindowTheme, createMainWindow } from './window'
 
 // Lets dev runs and screenshots use a throwaway profile.
-if (process.env['WRAITH_USER_DATA']) app.setPath('userData', process.env['WRAITH_USER_DATA'])
+if (process.env['CLAUDRON_USER_DATA']) app.setPath('userData', process.env['CLAUDRON_USER_DATA'])
 
 let mainWindow: BrowserWindow | null = null
 
@@ -92,7 +92,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   void app.whenReady().then(() => {
-    app.setAppUserModelId('dev.wraith.app')
+    app.setAppUserModelId('dev.claudron.app')
     void loadShellEnv()
     registerIpc()
     installCliTap()

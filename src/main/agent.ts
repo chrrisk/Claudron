@@ -17,7 +17,7 @@ import type {
   PermissionRequest,
   SessionSummary
 } from '@shared/agent'
-import type { WraithPermissionMode } from '@shared/settings'
+import type { ClaudronPermissionMode } from '@shared/settings'
 import { translateMessage } from './agent-translate'
 import { bundledClaude } from './claude-path'
 import { broadcast } from './ipc'
@@ -39,7 +39,7 @@ export const agentBus = new EventEmitter<{
   turnEnd: []
 }>()
 
-export function sdkPermissionMode(mode: WraithPermissionMode): PermissionMode {
+export function sdkPermissionMode(mode: ClaudronPermissionMode): PermissionMode {
   switch (mode) {
     case 'acceptEdits':
       return 'acceptEdits'
@@ -263,7 +263,7 @@ class AgentSession {
     await this.q?.interrupt().catch(() => undefined)
   }
 
-  async setPermissionMode(mode: WraithPermissionMode): Promise<void> {
+  async setPermissionMode(mode: ClaudronPermissionMode): Promise<void> {
     this.opts = { ...this.opts, permissionMode: mode }
     if (!this.q) return
     if (mode === 'unleashed') {
@@ -335,7 +335,7 @@ export const agent = {
   interrupt: (key: string) => sessionFor(key).interrupt(),
   respond: (key: string, requestId: string, decision: PermissionDecision) =>
     sessionFor(key).respond(requestId, decision),
-  setPermissionMode: async (mode: WraithPermissionMode) => {
+  setPermissionMode: async (mode: ClaudronPermissionMode) => {
     await Promise.all([...sessions.values()].map((s) => s.setPermissionMode(mode)))
   },
   close: (key: string) => {

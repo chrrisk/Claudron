@@ -1,4 +1,4 @@
-import type { WraithPermissionMode } from './settings'
+import type { ClaudronPermissionMode } from './settings'
 
 export interface PtySpawnOptions {
   /** One pty per project tab, keyed by project id. */
@@ -6,7 +6,7 @@ export interface PtySpawnOptions {
   cwd: string
   cols: number
   rows: number
-  permissionMode: WraithPermissionMode
+  permissionMode: ClaudronPermissionMode
   /** Pass --continue to pick the most recent conversation back up. */
   continueSession?: boolean
 }
@@ -25,8 +25,8 @@ export interface PtyExit {
   exitCode: number
 }
 
-/** CLI flags for each Wraith permission mode. */
-export function permissionFlags(mode: WraithPermissionMode): string[] {
+/** CLI flags for each Claudron permission mode. */
+export function permissionFlags(mode: ClaudronPermissionMode): string[] {
   switch (mode) {
     case 'acceptEdits':
       return ['--permission-mode', 'acceptEdits']

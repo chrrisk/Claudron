@@ -13,14 +13,14 @@ export const useSettings = create<SettingsState>((set, get) => ({
   update: (patch) => {
     // Optimistic: apply locally, then let main persist and echo back.
     set({ settings: { ...get().settings, ...patch } })
-    void window.wraith.invoke('settings:set', patch)
+    void window.claudron.invoke('settings:set', patch)
   }
 }))
 
 export async function hydrateSettings(): Promise<void> {
-  const settings = await window.wraith.invoke('settings:get')
+  const settings = await window.claudron.invoke('settings:get')
   useSettings.setState({ settings, ready: true })
-  window.wraith.on('settings:changed', (next) => useSettings.setState({ settings: next }))
+  window.claudron.on('settings:changed', (next) => useSettings.setState({ settings: next }))
 }
 
 /** Shorthand selector for a single setting. */

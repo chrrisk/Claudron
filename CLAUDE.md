@@ -1,4 +1,4 @@
-# Wraith
+# Claudron
 
 Desktop wrapper for Claude Code (Electron + React + TypeScript). Windows and macOS.
 

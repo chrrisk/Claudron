@@ -19,7 +19,7 @@ export function createMainWindow(theme: Theme): BrowserWindow {
     minWidth: 960,
     minHeight: 600,
     show: false,
-    title: 'Wraith',
+    title: 'Claudron',
     backgroundColor: BG[theme],
     titleBarStyle: 'hidden',
     ...(isMac
@@ -33,7 +33,8 @@ export function createMainWindow(theme: Theme): BrowserWindow {
     }
   })
 
-  win.once('ready-to-show', () => win.show())
+  // Snapshot runs (see snapshot.ts) must not steal focus from whatever you are typing in.
+  win.once('ready-to-show', () => (process.env['CLAUDRON_SNAPSHOT'] ? win.showInactive() : win.show()))
 
   // Links open in the real browser, never inside the app.
   win.webContents.setWindowOpenHandler(({ url }) => {

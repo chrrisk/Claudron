@@ -23,7 +23,7 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
   const [branch, setBranch] = useState<string | null>(null)
 
   useEffect(() => {
-    void window.wraith.invoke('projects:branch', project.path).then(setBranch)
+    void window.claudron.invoke('projects:branch', project.path).then(setBranch)
   }, [project.path])
 
   useEffect(() => {

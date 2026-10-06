@@ -27,7 +27,7 @@ installThemeVars()
 wireCliEvents()
 hotkeys.ctrlSpace = () => spotify('toggle')
 document.documentElement.style.setProperty('--mono-font', MONO)
-document.body.classList.add(`platform-${window.wraith.platform}`)
+document.body.classList.add(`platform-${window.claudron.platform}`)
 
 void Promise.all([hydrateSettings(), loadAppInfo(), hydrateUsage(), hydrateSpotify()]).then(() => {
   createRoot(document.getElementById('root')!).render(

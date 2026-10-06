@@ -4,6 +4,7 @@ import { findClaude, spawnTarget } from './claude-path'
 import { broadcast } from './ipc'
 import { composeNotes } from '@shared/notes'
 import { loadShellEnv } from './shell-env'
+import { sessionExists } from './agent'
 import { getSettings } from './settings-store'
 import { prepareSsh, type Launch } from './ssh-session'
 
@@ -56,7 +57,7 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
   }
 
   await loadShellEnv()
-  const launch = opts.ssh ? await prepareSsh(opts) : prepareLocal(opts)
+  const launch = opts.ssh ? await prepareSsh(opts) : await prepareLocal(opts)
   if (!launch.ok) return launch
 
   let proc: pty.IPty
@@ -96,7 +97,7 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
   return { ok: true, pid: proc.pid, binary: launch.binary, reused: false }
 }
 
-function prepareLocal(opts: PtySpawnOptions): Launch {
+async function prepareLocal(opts: PtySpawnOptions): Promise<Launch> {
   const claude = findClaude()
   if (!claude) {
     return {
@@ -104,9 +105,16 @@ function prepareLocal(opts: PtySpawnOptions): Launch {
       error: 'Could not find the claude binary. Install Claude Code (https://claude.com/claude-code) and restart Claudron.'
     }
   }
+  const resumeFlags = opts.sessionId
+    ? (await sessionExists(opts.cwd, opts.sessionId))
+      ? ['--resume', opts.sessionId]
+      : ['--session-id', opts.sessionId]
+    : opts.continueSession
+      ? ['--continue']
+      : []
   const extras = argProviders.map((p) => p(opts))
   const args = [
-    ...(opts.continueSession ? ['--continue'] : []),
+    ...resumeFlags,
     ...permissionFlags(opts.permissionMode),
     ...(getSettings().model ? ['--model', getSettings().model] : []),
     ...composeNotes(getSettings().agentNote, []),

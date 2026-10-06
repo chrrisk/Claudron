@@ -14,6 +14,8 @@ export interface Project {
   path: string
   /** Set for SSH sessions. `path` is then only a display string like user@host:~/dev. */
   ssh?: { hostId: string }
+  /** The one Claude conversation this tab owns, in both UI and CLI mode. Local tabs only. */
+  sessionId?: string
 }
 
 export interface Settings {

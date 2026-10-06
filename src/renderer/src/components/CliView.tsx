@@ -40,7 +40,7 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
   useEffect(() => {
     const host = hostRef.current
     if (!host) return
-    const entry = ensureTerminal(project.id, project.path, theme, project.ssh?.hostId)
+    const entry = ensureTerminal(project.id, project.path, theme, project.ssh?.hostId, project.sessionId)
     void attachTerminal(entry, host, permissionMode)
     // onKey, not onData: xterm also emits onData for automatic replies to claude's terminal queries.
     const typed = entry.term.onKey(() => {

@@ -38,7 +38,8 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
       update({ activeProjectId: existing.id })
       return
     }
-    update({ projects: [...settings.projects, project], activeProjectId: project.id })
+    const fresh = { ...project, sessionId: crypto.randomUUID() }
+    update({ projects: [...settings.projects, fresh], activeProjectId: fresh.id })
   }
 
   const duplicate = (p: Project): void => {
@@ -47,7 +48,7 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
     const taken = new Set(settings.projects.map((x) => x.name))
     let n = 2
     while (taken.has(`${base} ${n}`)) n++
-    const copy: Project = { id: crypto.randomUUID(), name: `${base} ${n}`, path: p.path }
+    const copy: Project = { id: crypto.randomUUID(), name: `${base} ${n}`, path: p.path, sessionId: crypto.randomUUID() }
     update({ projects: [...settings.projects, copy], activeProjectId: copy.id })
   }
 

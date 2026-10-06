@@ -1,14 +1,16 @@
-import { timeAgo, MOON_FRAMES, formatDuration } from '@shared/copy'
+import { MOON_FRAMES, formatDuration } from '@shared/copy'
 import type { Project } from '@shared/settings'
 import { switchSession, useAgent } from '../store/agent'
 import { useSettings } from '../store/settings'
 import { useHaunt } from '../lib/haunt'
 import { useTicker } from '../lib/hooks'
-import { PlusIcon, TombstoneIcon } from './icons'
+import { PlusIcon } from './icons'
 
 export function Sidebar({ project }: { project: Project }): React.JSX.Element {
   const conv = useAgent((s) => s.convs[project.id])
   const mode = useSettings((s) => s.settings.permissionMode)
+  const update = useSettings((s) => s.update)
+  const projects = useSettings((s) => s.settings.projects)
   const { copy, spooky, still } = useHaunt()
   const tick = useTicker(700, !!conv?.busy && !still)
 
@@ -18,30 +20,14 @@ export function Sidebar({ project }: { project: Project }): React.JSX.Element {
   const spin = spooky && !still ? MOON_FRAMES[tick % 4] : '•'
   const runLabel = busy ? `${spin} ${spooky ? `${verb}…` : 'running'} · ${elapsed}` : conv?.sessionId ? 'idle' : 'new'
 
-  const old = (conv?.history ?? []).filter((h) => h.sessionId !== conv?.sessionId).slice(0, 8)
-
   return (
     <aside className="sidebar">
       <section>
-        <div className="side-heading">SESSIONS</div>
+        <div className="side-heading">THIS TAB</div>
         <div className="session current" aria-current="true">
           <span className="session-title">{conv?.title ?? (spooky ? 'A fresh haunting' : 'New session')}</span>
           <span className="session-run mono">{runLabel}</span>
         </div>
-        {old.map((h) => (
-          <button
-            key={h.sessionId}
-            className="session"
-            title={h.title}
-            onClick={() => void switchSession(project, mode, h)}
-          >
-            {spooky && <TombstoneIcon />}
-            <span className="session-text">
-              <span className="session-title">{copy.endedTitle(h.title)}</span>
-              <span className="session-meta">{copy.endedMeta(timeAgo(h.lastModified))}</span>
-            </span>
-          </button>
-        ))}
       </section>
 
       <section>
@@ -58,9 +44,13 @@ export function Sidebar({ project }: { project: Project }): React.JSX.Element {
       </section>
 
       <div className="spacer" />
-      <button className="summon-btn" onClick={() => void switchSession(project, mode)}>
+      <button className="summon-btn" onClick={() => {
+          const next = { ...project, sessionId: crypto.randomUUID() }
+          update({ projects: projects.map((p) => (p.id === project.id ? next : p)) })
+          void switchSession(next, mode)
+        }}>
         <PlusIcon />
-        {copy.newSession}
+        Start over
       </button>
     </aside>
   )

@@ -21,6 +21,8 @@ export interface TermEntry {
   opened: boolean
   /** Set for SSH tabs; claude runs on that saved host. */
   sshHostId?: string
+  /** The tab's own claude conversation (local tabs). */
+  sessionId?: string
   exitCode?: number
 }
 
@@ -93,7 +95,7 @@ export function getTerminal(id: string): TermEntry | undefined {
   return entries.get(id)
 }
 
-export function ensureTerminal(id: string, cwd: string, theme: Theme, sshHostId?: string): TermEntry {
+export function ensureTerminal(id: string, cwd: string, theme: Theme, sshHostId?: string, sessionId?: string): TermEntry {
   wireIpc()
   let e = entries.get(id)
   if (e) return e
@@ -114,7 +116,7 @@ export function ensureTerminal(id: string, cwd: string, theme: Theme, sshHostId?
   const element = document.createElement('div')
   element.className = 'xterm-host'
 
-  e = { id, cwd, term, fit, element, status: 'idle', lastOutputAt: 0, opened: false, sshHostId }
+  e = { id, cwd, term, fit, element, status: 'idle', lastOutputAt: 0, opened: false, sshHostId, sessionId }
   const entry = e
   entries.set(id, entry)
 
@@ -192,6 +194,7 @@ async function startClaude(
     rows: entry.term.rows,
     permissionMode,
     continueSession,
+    sessionId: entry.sshHostId ? undefined : entry.sessionId,
     ssh: entry.sshHostId ? { hostId: entry.sshHostId } : undefined
   })
   if (res.ok) {

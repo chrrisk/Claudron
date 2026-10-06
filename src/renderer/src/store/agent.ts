@@ -145,8 +145,20 @@ export async function ensureSession(project: Project, permissionMode: ClaudronPe
   wireAgentEvents()
   if (conversation(project.id).opened) return
   patch(project.id, () => ({ opened: true }))
-  await window.claudron.invoke('agent:open', { key: project.id, cwd: project.path, permissionMode })
-  void refreshHistory(project)
+  // One tab, one conversation: pick this tab's own session back up if it already has history.
+  const history = await window.claudron.invoke('agent:sessions', project.path)
+  const mine = project.sessionId ? history.find((h) => h.sessionId === project.sessionId) : undefined
+  if (mine) {
+    await switchSession(project, permissionMode, mine)
+    return
+  }
+  await window.claudron.invoke('agent:open', {
+    key: project.id,
+    cwd: project.path,
+    permissionMode,
+    sessionId: project.sessionId
+  })
+  patch(project.id, () => ({ history }))
 }
 
 export async function refreshHistory(project: Project): Promise<void> {
@@ -206,7 +218,8 @@ export async function switchSession(
     key: project.id,
     cwd: project.path,
     permissionMode,
-    resume: resume?.sessionId
+    resume: resume?.sessionId,
+    sessionId: resume ? undefined : project.sessionId
   })
   if (resume) {
     const events = await window.claudron.invoke('agent:history', resume.sessionId, project.path)

@@ -151,6 +151,7 @@ class AgentSession {
         cwd: this.opts.cwd,
         model: getSettings().model || undefined,
         resume: this.opts.resume,
+        sessionId: this.opts.resume ? undefined : this.opts.sessionId,
         permissionMode: sdkPermissionMode(mode),
         allowDangerouslySkipPermissions: mode === 'unleashed',
         canUseTool: this.canUseTool,
@@ -354,7 +355,7 @@ export const agent = {
 export async function listProjectSessions(cwd: string): Promise<SessionSummary[]> {
   try {
     const { listSessions } = await loadSdk()
-    const list = await listSessions({ dir: cwd, limit: 12 })
+    const list = await listSessions({ dir: cwd, limit: 200 })
     return list.map((s) => ({
       sessionId: s.sessionId,
       title: s.customTitle || s.summary || s.firstPrompt || 'Untitled session',
@@ -364,6 +365,10 @@ export async function listProjectSessions(cwd: string): Promise<SessionSummary[]
   } catch {
     return []
   }
+}
+
+export async function sessionExists(cwd: string, id: string): Promise<boolean> {
+  return (await listProjectSessions(cwd)).some((s) => s.sessionId === id)
 }
 
 export async function loadHistory(sessionId: string, cwd: string): Promise<AgentEvent[]> {

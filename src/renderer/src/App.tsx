@@ -33,6 +33,28 @@ export function App(): React.JSX.Element {
     void restartAllTerminals(settings.permissionMode)
   }, [settings.permissionMode])
 
+  // Older tabs have no session id yet: adopt the folder's latest conversation, others start fresh.
+  const migrating = useRef(false)
+  useEffect(() => {
+    const need = settings.projects.filter((p) => !p.ssh && !p.sessionId)
+    if (!need.length || migrating.current) return
+    migrating.current = true
+    void (async () => {
+      const claimed = new Set<string>()
+      const ids = new Map<string, string>()
+      for (const p of need) {
+        const list = await window.claudron.invoke('agent:sessions', p.path)
+        const free = list.find((s) => !claimed.has(s.sessionId) && !settings.projects.some((x) => x.sessionId === s.sessionId))
+        const id = free?.sessionId ?? crypto.randomUUID()
+        claimed.add(id)
+        ids.set(p.id, id)
+      }
+      const cur = useSettings.getState().settings.projects
+      useSettings.getState().update({ projects: cur.map((p) => (ids.has(p.id) && !p.sessionId ? { ...p, sessionId: ids.get(p.id) } : p)) })
+      migrating.current = false
+    })()
+  }, [settings.projects])
+
   const effectiveMode = project?.ssh ? 'cli' : settings.mode
 
   return (
@@ -50,7 +72,7 @@ export function App(): React.JSX.Element {
       <main className="app-body">
         {!project ? (
           <EmptyState />
-        ) : effectiveMode === 'cli' ? (
+        ) : !project.ssh && !project.sessionId ? null : effectiveMode === 'cli' ? (
           <CliView key={project.id} project={project} />
         ) : (
           <UiView key={project.id} project={project} />

@@ -46,6 +46,8 @@ export interface AgentStartOptions {
   permissionMode: ClaudronPermissionMode
   /** Session id to resume, if continuing an old conversation. */
   resume?: string
+  /** Id for a brand new conversation, so the tab can find it again. */
+  sessionId?: string
 }
 
 export interface SessionSummary {

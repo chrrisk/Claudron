@@ -174,3 +174,8 @@
 .square-btn[aria-expanded='true'] {
   border-color: var(--accent);
 }
+
+.segmented button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

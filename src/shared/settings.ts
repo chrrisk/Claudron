@@ -1,3 +1,5 @@
+import type { SshHost } from './ssh'
+
 export type Theme = 'dark' | 'light'
 export type InterfaceMode = 'ui' | 'cli'
 export type HauntLevel = 'subtle' | 'spooky' | 'full'
@@ -10,6 +12,8 @@ export interface Project {
   id: string
   name: string
   path: string
+  /** Set for SSH sessions. `path` is then only a display string like user@host:~/dev. */
+  ssh?: { hostId: string }
 }
 
 export interface Settings {
@@ -30,6 +34,12 @@ export interface Settings {
   spotifyClientId: string
   /** Playlist URI or link for the spooky button. Empty means search for one. */
   spookyPlaylist: string
+  sshHosts: SshHost[]
+  /** Client-side ServerAliveInterval so idle connections are not dropped. */
+  sshKeepalive: boolean
+  sshKeepaliveInterval: number
+  /** "For the record" note appended to the system prompt of every Claude session, local and SSH. */
+  agentNote: string
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -45,5 +55,9 @@ export const DEFAULT_SETTINGS: Settings = {
   projects: [],
   activeProjectId: null,
   spotifyClientId: '',
-  spookyPlaylist: ''
+  spookyPlaylist: '',
+  sshHosts: [],
+  sshKeepalive: true,
+  sshKeepaliveInterval: 30,
+  agentNote: ''
 }

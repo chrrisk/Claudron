@@ -4,6 +4,9 @@ import { soundDefaults } from '@shared/sounds'
 import { useSettings } from '../store/settings'
 import { useSpotify } from '../store/spotify'
 import { FONT_FAMILIES } from '../themes'
+import { AgentNoteSettings } from './AgentNoteSettings'
+import { RemoteSettings } from './RemoteSettings'
+import { SecretsSettings } from './SecretsSettings'
 import { UnleashedWarning } from './UnleashedWarning'
 
 const HAUNT: [HauntLevel, string][] = [
@@ -195,6 +198,21 @@ export function SettingsPopover({ onClose }: { onClose: () => void }): React.JSX
           <span className="pop-heading">SPOTIFY PRESENCE</span>
           <Segmented label="Spotify presence" options={SPOTIFY} value={settings.spotify} onPick={set('spotify')} />
           {settings.spotify !== 'off' && <SpotifySettings />}
+        </div>
+
+        <div className="pop-section">
+          <span className="pop-heading">FOR THE RECORD</span>
+          <AgentNoteSettings />
+        </div>
+
+        <div className="pop-section">
+          <span className="pop-heading">REMOTE</span>
+          <RemoteSettings />
+        </div>
+
+        <div className="pop-section">
+          <span className="pop-heading">SECRETS</span>
+          <SecretsSettings />
         </div>
       </div>
       {warn && (

@@ -9,6 +9,8 @@ export interface PtySpawnOptions {
   permissionMode: ClaudronPermissionMode
   /** Pass --continue to pick the most recent conversation back up. */
   continueSession?: boolean
+  /** Run claude on a saved SSH host instead of locally. */
+  ssh?: { hostId: string }
 }
 
 export type PtySpawnResult =

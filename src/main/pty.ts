@@ -2,7 +2,10 @@ import * as pty from 'node-pty'
 import { permissionFlags, type PtySpawnOptions, type PtySpawnResult } from '@shared/pty'
 import { findClaude, spawnTarget } from './claude-path'
 import { broadcast } from './ipc'
+import { composeNotes } from '@shared/notes'
 import { loadShellEnv } from './shell-env'
+import { getSettings } from './settings-store'
+import { prepareSsh, type Launch } from './ssh-session'
 
 interface Session {
   proc: pty.IPty
@@ -10,6 +13,8 @@ interface Session {
   killed?: boolean
   buffer: string
   flushQueued: boolean
+  /** Runs once when the process ends (closes the secrets bridge for SSH sessions). */
+  cleanup?: () => void
 }
 
 const sessions = new Map<string, Session>()
@@ -51,38 +56,25 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
   }
 
   await loadShellEnv()
-  const claude = findClaude()
-  if (!claude) {
-    return {
-      ok: false,
-      error: 'Could not find the claude binary. Install Claude Code (https://claude.com/claude-code) and restart Claudron.'
-    }
-  }
-
-  const extras = argProviders.map((p) => p(opts))
-  const args = [
-    ...(opts.continueSession ? ['--continue'] : []),
-    ...permissionFlags(opts.permissionMode),
-    ...extras.flatMap((e) => e.args)
-  ]
-  const extraEnv = Object.assign({}, ...extras.map((e) => e.env ?? {})) as Record<string, string>
-  const target = spawnTarget(claude.path, args)
+  const launch = opts.ssh ? await prepareSsh(opts) : prepareLocal(opts)
+  if (!launch.ok) return launch
 
   let proc: pty.IPty
   try {
-    proc = pty.spawn(target.file, target.args, {
+    proc = pty.spawn(launch.file, launch.args, {
       name: 'xterm-256color',
       cols: Math.max(opts.cols, 2),
       rows: Math.max(opts.rows, 2),
-      cwd: opts.cwd,
-      env: childEnv({ ...extraEnv, TERM: 'xterm-256color', COLORTERM: 'truecolor', TERM_PROGRAM: 'claudron' }),
+      cwd: launch.cwd,
+      env: childEnv({ ...launch.env, TERM: 'xterm-256color', COLORTERM: 'truecolor', TERM_PROGRAM: 'claudron' }),
       useConpty: true
     })
   } catch (err) {
-    return { ok: false, error: `Failed to start claude: ${(err as Error).message}` }
+    launch.cleanup?.()
+    return { ok: false, error: `Failed to start ${opts.ssh ? 'ssh' : 'claude'}: ${(err as Error).message}` }
   }
 
-  const session: Session = { proc, buffer: '', flushQueued: false }
+  const session: Session = { proc, buffer: '', flushQueued: false, cleanup: launch.cleanup }
   sessions.set(opts.id, session)
 
   // Batch bursts of output into one IPC message per tick.
@@ -96,11 +88,32 @@ export async function spawnPty(opts: PtySpawnOptions): Promise<PtySpawnResult> {
 
   proc.onExit(({ exitCode }) => {
     flush(opts.id)
+    session.cleanup?.()
     if (sessions.get(opts.id)?.proc === proc) sessions.delete(opts.id)
     if (!session.killed) broadcast('pty:exit', { id: opts.id, exitCode })
   })
 
-  return { ok: true, pid: proc.pid, binary: claude.path, reused: false }
+  return { ok: true, pid: proc.pid, binary: launch.binary, reused: false }
+}
+
+function prepareLocal(opts: PtySpawnOptions): Launch {
+  const claude = findClaude()
+  if (!claude) {
+    return {
+      ok: false,
+      error: 'Could not find the claude binary. Install Claude Code (https://claude.com/claude-code) and restart Claudron.'
+    }
+  }
+  const extras = argProviders.map((p) => p(opts))
+  const args = [
+    ...(opts.continueSession ? ['--continue'] : []),
+    ...permissionFlags(opts.permissionMode),
+    ...composeNotes(getSettings().agentNote, []),
+    ...extras.flatMap((e) => e.args)
+  ]
+  const env = Object.assign({}, ...extras.map((e) => e.env ?? {})) as Record<string, string>
+  const target = spawnTarget(claude.path, args)
+  return { ok: true, file: target.file, args: target.args, cwd: opts.cwd, env, binary: claude.path }
 }
 
 export function writePty(id: string, data: string): void {

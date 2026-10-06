@@ -2,6 +2,7 @@ import type { AgentEnvelope, AgentEvent, AgentStartOptions, PermissionDecision, 
 import type { PtyData, PtyExit, PtySpawnOptions, PtySpawnResult } from './pty'
 import type { Project, Settings } from './settings'
 import type { SpotifyCommand, SpotifyState } from './spotify'
+import type { SecretMeta } from './ssh'
 import type { UsageSnapshot } from './usage'
 
 /**
@@ -30,6 +31,13 @@ export interface InvokeMap {
   'spotify:connect': { args: []; result: void }
   'spotify:disconnect': { args: []; result: void }
   'spotify:command': { args: [cmd: SpotifyCommand]; result: void }
+  'ssh:config-hosts': { args: []; result: string[] }
+  'secrets:list': { args: []; result: SecretMeta[] }
+  'secrets:add': {
+    args: [name: string, value: string, scope: string]
+    result: { ok: true; secrets: SecretMeta[] } | { ok: false; error: string }
+  }
+  'secrets:remove': { args: [id: string]; result: SecretMeta[] }
 }
 
 /** Fire-and-forget messages from renderer to main. */
@@ -52,6 +60,8 @@ export interface EventMap {
   /** Hook events from a CLI session: permission, tool-done, prompt, stop. */
   'cli:event': { id: string; kind: string; at: number }
   'spotify:state': SpotifyState
+  /** Claude used a stored secret over the askpass bridge. The value never travels. */
+  'ssh:secret-used': { id: string; name: string; at: number }
 }
 
 // Runtime allowlists. Typed as Record<keyof Map, true> so a missing key fails to compile.
@@ -75,7 +85,11 @@ export const INVOKE_CHANNELS: Record<keyof InvokeMap, true> = {
   'spotify:get': true,
   'spotify:connect': true,
   'spotify:disconnect': true,
-  'spotify:command': true
+  'spotify:command': true,
+  'ssh:config-hosts': true,
+  'secrets:list': true,
+  'secrets:add': true,
+  'secrets:remove': true
 }
 
 export const SEND_CHANNELS: Record<keyof SendMap, true> = {
@@ -93,7 +107,8 @@ export const EVENT_CHANNELS: Record<keyof EventMap, true> = {
   'usage:changed': true,
   'cli:status': true,
   'cli:event': true,
-  'spotify:state': true
+  'spotify:state': true,
+  'ssh:secret-used': true
 }
 
 export type Unsubscribe = () => void

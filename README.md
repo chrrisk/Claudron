@@ -77,6 +77,15 @@ Both run a tiny script, `resources/claudron-tap.cjs`, using Claudron's own Elect
 
 Changing the permission mode while a terminal is open restarts `claude` with `--continue`, so you land back in the same conversation.
 
+## SSH sessions
+
+Click the remote icon in the title bar, pick a host (saved, or from `~/.ssh/config`) or type `user@host[:port]`, and Claudron opens a tab that runs `claude` on that machine. SSH tabs are always CLI mode; every other setting stays shared. The usage cauldron shows NO READING for them.
+
+- Needs the system OpenSSH client locally and `claude` installed on the remote.
+- Settings > Remote: keepalive (a client-side ping so idle links are not dropped) and a start folder per host. Keepalive cannot beat a server that ends idle sessions on purpose.
+- Settings > Secrets: save a sudo password. Claude runs `sudo -A` and Claudron answers over a per-session loopback bridge, so the password never appears in the terminal, the environment or the transcript. Needs `bash` on the remote and `AllowTcpForwarding` on. This is not a sandbox: a determined agent on a host you gave it root on can still do harm.
+- Settings > For the record: a note sent to every Claude session, local and SSH.
+
 ## Spotify setup
 
 Spotify needs an app registered to your account. It takes two minutes and there is no secret involved (Claudron uses PKCE).

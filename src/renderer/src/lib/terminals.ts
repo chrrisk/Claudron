@@ -19,6 +19,9 @@ export interface TermEntry {
   error?: string
   lastOutputAt: number
   opened: boolean
+  /** Set for SSH tabs; claude runs on that saved host. */
+  sshHostId?: string
+  exitCode?: number
 }
 
 const entries = new Map<string, TermEntry>()
@@ -78,7 +81,10 @@ function wireIpc(): void {
     const e = entries.get(id)
     if (!e) return
     e.status = 'exited'
-    e.term.write(`\r\n\x1b[2m[claude exited with code ${exitCode}. Press Enter to start a new session.]\x1b[0m\r\n`)
+    e.exitCode = exitCode
+    const what = e.sshHostId ? 'connection closed' : 'claude exited'
+    const again = e.sshHostId ? 'reconnect' : 'start a new session'
+    e.term.write(`\r\n\x1b[2m[${what} (code ${exitCode}). Press Enter to ${again}.]\x1b[0m\r\n`)
     notify()
   })
 }
@@ -87,7 +93,7 @@ export function getTerminal(id: string): TermEntry | undefined {
   return entries.get(id)
 }
 
-export function ensureTerminal(id: string, cwd: string, theme: Theme): TermEntry {
+export function ensureTerminal(id: string, cwd: string, theme: Theme, sshHostId?: string): TermEntry {
   wireIpc()
   let e = entries.get(id)
   if (e) return e
@@ -108,7 +114,7 @@ export function ensureTerminal(id: string, cwd: string, theme: Theme): TermEntry
   const element = document.createElement('div')
   element.className = 'xterm-host'
 
-  e = { id, cwd, term, fit, element, status: 'idle', lastOutputAt: 0, opened: false }
+  e = { id, cwd, term, fit, element, status: 'idle', lastOutputAt: 0, opened: false, sshHostId }
   const entry = e
   entries.set(id, entry)
 
@@ -123,7 +129,7 @@ export function ensureTerminal(id: string, cwd: string, theme: Theme): TermEntry
 
   term.onData((data) => {
     if (entry.status === 'exited') {
-      if (data === '\r') void startClaude(entry, currentPermissionMode)
+      if (data === '\r') void startClaude(entry, currentPermissionMode, !!entry.sshHostId)
       return
     }
     window.claudron.send('pty:write', id, data)
@@ -185,7 +191,8 @@ async function startClaude(
     cols: entry.term.cols,
     rows: entry.term.rows,
     permissionMode,
-    continueSession
+    continueSession,
+    ssh: entry.sshHostId ? { hostId: entry.sshHostId } : undefined
   })
   if (res.ok) {
     entry.status = 'running'
@@ -209,6 +216,15 @@ export async function restartTerminal(id: string, permissionMode: ClaudronPermis
   window.claudron.send('pty:kill', id)
   e.term.write('\r\n\x1b[2m[claudron: restarting claude with the new permission mode]\x1b[0m\r\n')
   await startClaude(e, permissionMode, true)
+}
+
+/** Bring an SSH terminal back after a drop. `fresh` skips --continue. */
+export async function reconnectTerminal(id: string, permissionMode: ClaudronPermissionMode, fresh = false): Promise<void> {
+  const e = entries.get(id)
+  if (!e) return
+  currentPermissionMode = permissionMode
+  e.exitCode = undefined
+  await startClaude(e, permissionMode, !fresh)
 }
 
 /** Restart every running terminal (permission mode is global). */

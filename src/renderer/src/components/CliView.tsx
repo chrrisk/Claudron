@@ -13,6 +13,10 @@ import {
 import { StatusLine } from './StatusLine'
 import { Fog, TerminalBats } from './Haunting'
 import { PumpkinBanner } from './PumpkinBanner'
+import { SshLost } from './SshLost'
+import { HockeyMaskIcon } from './icons'
+import { isFriday13 } from '@shared/eggs'
+import { useHaunt } from '../lib/haunt'
 import { shortPath } from '../lib/paths'
 
 export function CliView({ project }: { project: Project }): React.JSX.Element {
@@ -22,14 +26,18 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
   const [typed, setTyped] = useState(false)
   const [branch, setBranch] = useState<string | null>(null)
 
+  const isSsh = !!project.ssh
+  const { spooky } = useHaunt()
+  const f13 = spooky && isFriday13(new Date())
   useEffect(() => {
+    if (isSsh) return
     void window.claudron.invoke('projects:branch', project.path).then(setBranch)
-  }, [project.path])
+  }, [project.path, isSsh])
 
   useEffect(() => {
     const host = hostRef.current
     if (!host) return
-    const entry = ensureTerminal(project.id, project.path, theme)
+    const entry = ensureTerminal(project.id, project.path, theme, project.ssh?.hostId)
     void attachTerminal(entry, host, permissionMode)
     // onKey, not onData: xterm also emits onData for automatic replies to claude's terminal queries.
     const typed = entry.term.onKey(() => {
@@ -52,12 +60,17 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
   const status = useSyncExternalStore(subscribeTerminals, () => getTerminal(project.id)?.status ?? 'idle')
 
   return (
-    <div className="cli">
+    <div className={`cli ${isSsh ? 'ssh' : ''} ${f13 ? 'f13' : ''}`}>
+      {f13 && isSsh && <HockeyMaskIcon className="f13-mask" aria-hidden />}
       <Fog />
       <TerminalBats />
-      <PumpkinBanner where={[shortPath(project.path), branch].filter(Boolean).join(' · ')} dismissed={typed} />
+      <PumpkinBanner
+        where={isSsh ? project.path : [shortPath(project.path), branch].filter(Boolean).join(' · ')}
+        dismissed={typed}
+      />
       <div className="cli-term" ref={hostRef} data-status={status} />
       <StatusLine project={project} />
+      {isSsh && <SshLost project={project} />}
     </div>
   )
 }

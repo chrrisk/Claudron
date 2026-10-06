@@ -7,12 +7,15 @@ import { CliView } from './components/CliView'
 import { EmptyState } from './components/EmptyState'
 import { UiView } from './components/UiView'
 import { SettingsPopover } from './components/SettingsPopover'
+import { HostPicker } from './components/HostPicker'
+import { SecretToast } from './components/SecretToast'
 import { SoundEffects } from './components/SoundEffects'
 import { SpotifyPill } from './components/Spotify'
 
 export function App(): React.JSX.Element {
   const settings = useSettings((s) => s.settings)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [hostsOpen, setHostsOpen] = useState(false)
   const project = settings.projects.find((p) => p.id === settings.activeProjectId) ?? null
 
   useEffect(() => {
@@ -30,19 +33,24 @@ export function App(): React.JSX.Element {
     void restartAllTerminals(settings.permissionMode)
   }, [settings.permissionMode])
 
+  const effectiveMode = project?.ssh ? 'cli' : settings.mode
+
   return (
     <div className="app">
       <TitleBar
         settingsOpen={settingsOpen}
         onToggleSettings={() => setSettingsOpen((o) => !o)}
+        onOpenHosts={() => setHostsOpen((o) => !o)}
         rightSlot={settings.spotify === 'pill' ? <SpotifyPill /> : null}
       />
       <SoundEffects />
+      <SecretToast />
       {settingsOpen && <SettingsPopover onClose={() => setSettingsOpen(false)} />}
+      {hostsOpen && <HostPicker onClose={() => setHostsOpen(false)} />}
       <main className="app-body">
         {!project ? (
           <EmptyState />
-        ) : settings.mode === 'cli' ? (
+        ) : effectiveMode === 'cli' ? (
           <CliView key={project.id} project={project} />
         ) : (
           <UiView key={project.id} project={project} />

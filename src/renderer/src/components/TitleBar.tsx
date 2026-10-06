@@ -1,18 +1,22 @@
 import type { Project } from '@shared/settings'
 import { useSettings } from '../store/settings'
-import { CloseIcon, GearIcon, LogoMark, MoonIcon, PlusIcon, SunriseIcon } from './icons'
+import { CloseIcon, GearIcon, LogoMark, MoonIcon, PlusIcon, RemoteIcon, SunriseIcon } from './icons'
+import { HostChip, SshDot } from './SshBadge'
 
 interface Props {
   settingsOpen: boolean
   onToggleSettings: () => void
+  onOpenHosts: () => void
   rightSlot?: React.ReactNode
 }
 
-export function TitleBar({ settingsOpen, onToggleSettings, rightSlot }: Props): React.JSX.Element {
+export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlot }: Props): React.JSX.Element {
   const settings = useSettings((s) => s.settings)
   const update = useSettings((s) => s.update)
   const isDark = settings.theme === 'dark'
-  const isUi = settings.mode === 'ui'
+  const activeProject = settings.projects.find((p) => p.id === settings.activeProjectId)
+  const sshActive = !!activeProject?.ssh
+  const isUi = settings.mode === 'ui' && !sshActive
 
   const openProject = async (): Promise<void> => {
     const project = await window.claudron.invoke('projects:pick')
@@ -54,7 +58,8 @@ export function TitleBar({ settingsOpen, onToggleSettings, rightSlot }: Props): 
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && update({ activeProjectId: p.id })}
               onAuxClick={(e) => e.button === 1 && closeProject(p)}
             >
-              {active && <span className="dot" />}
+              {p.ssh ? <SshDot id={p.id} /> : active && <span className="dot" />}
+              {p.ssh && <HostChip />}
               <span className="label">{p.name}</span>
               <span
                 className="close"
@@ -73,6 +78,9 @@ export function TitleBar({ settingsOpen, onToggleSettings, rightSlot }: Props): 
         <button className="icon-btn" aria-label="Open project" title="Open project folder" onClick={openProject}>
           <PlusIcon />
         </button>
+        <button className="icon-btn" aria-label="Open SSH session" title="Open over SSH" onClick={onOpenHosts}>
+          <RemoteIcon />
+        </button>
       </div>
 
       <div className="spacer" />
@@ -80,7 +88,12 @@ export function TitleBar({ settingsOpen, onToggleSettings, rightSlot }: Props): 
       {rightSlot}
 
       <div className="segmented" role="group" aria-label="Interface style">
-        <button aria-pressed={isUi} onClick={() => update({ mode: 'ui' })}>
+        <button
+          aria-pressed={isUi}
+          disabled={sshActive}
+          title={sshActive ? 'SSH sessions run in CLI mode' : undefined}
+          onClick={() => update({ mode: 'ui' })}
+        >
           UI
         </button>
         <button className="mono" aria-pressed={!isUi} onClick={() => update({ mode: 'cli' })}>

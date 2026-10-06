@@ -116,6 +116,10 @@ States in `Spotify.dc.html`: not connected, playing, ducked (volume drops to 30%
 - Spooky playlist button: search playlists for "halloween" or let the user pin one in settings.
 - Hotkey in CLI mode: `ctrl+space` toggles play/pause.
 
+## SSH sessions
+
+An SSH session is a project tab with `ssh: { hostId }`, forced to CLI view. Main runs `ssh -tt` with a keepalive and a base64 `sh -c` remote command through node-pty. Secrets live in Electron `safeStorage` and reach the remote only through the SUDO_ASKPASS loopback bridge. No usage reading for SSH tabs. Full design: `docs/superpowers/specs/2026-10-05-ssh-sessions-design.md`.
+
 ## Build order
 
 1. Electron + React shell, title bar, theme tokens, dark/light toggle, settings store.

@@ -17,6 +17,8 @@ import {
   setPermissionWaiting,
   spotifyCommand
 } from './spotify'
+import { addSecret, listSecrets, removeSecret } from './secrets'
+import { readConfigHosts } from './ssh'
 import { getUsage, installCliTap, onCliEvent, refreshUsage, startUsagePolling, stopUsage } from './usage'
 import { applyWindowTheme, createMainWindow } from './window'
 
@@ -64,6 +66,11 @@ function registerIpc(): void {
   handle('spotify:connect', () => connectSpotify())
   handle('spotify:disconnect', () => disconnectSpotify())
   handle('spotify:command', (cmd) => spotifyCommand(cmd))
+
+  handle('ssh:config-hosts', () => readConfigHosts())
+  handle('secrets:list', () => listSecrets())
+  handle('secrets:add', (name, value, scope) => addSecret(name, value, scope))
+  handle('secrets:remove', (id) => removeSecret(id))
 }
 
 /** Duck the music while any permission prompt waits, UI or CLI. */

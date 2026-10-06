@@ -159,3 +159,24 @@ export function Bat({ width, style, ...rest }: P & { width: number }): React.JSX
     </svg>
   )
 }
+
+export function RemoteIcon(props: P): React.JSX.Element {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M4 5h16v10H4zM9 19h6M12 15v4" />
+      <path d="M9 9l2 1.5L9 12M13 12h2.5" />
+    </svg>
+  )
+}
+
+export function HockeyMaskIcon(props: P): React.JSX.Element {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true" {...props}>
+      <path d="M12 3c-4 0-7 3-7 8 0 5 3 10 7 10s7-5 7-10c0-5-3-8-7-8z" />
+      <path d="M8 9.5l2.5 1M16 9.5l-2.5 1" strokeLinecap="round" />
+      <circle cx="12" cy="14" r="0.8" fill="currentColor" />
+      <circle cx="10" cy="16.5" r="0.7" fill="currentColor" />
+      <circle cx="14" cy="16.5" r="0.7" fill="currentColor" />
+    </svg>
+  )
+}

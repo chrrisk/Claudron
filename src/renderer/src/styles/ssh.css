@@ -1,0 +1,230 @@
+:root[data-theme='dark'] {
+  --ssh-pumpkin: #ff8a3d;
+  --ssh-witch: #b79cff;
+  --ssh-slime: #9ae66e;
+  --ssh-bone: #f3ead2;
+  --ssh-blood: #ff5370;
+}
+:root[data-theme='light'] {
+  --ssh-pumpkin: #b44700;
+  --ssh-witch: #5a2fc2;
+  --ssh-slime: #2f7d1e;
+  --ssh-bone: #2a1d3d;
+  --ssh-blood: #b3203a;
+}
+
+.host-chip {
+  position: relative;
+  font: 600 9.5px var(--mono-font);
+  letter-spacing: 0.1em;
+  padding: 1px 6px;
+  border-radius: 6px;
+  color: var(--ssh-pumpkin);
+  background: color-mix(in srgb, var(--ssh-pumpkin) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ssh-pumpkin) 40%, transparent);
+}
+.host-chip.hallow::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  border-style: solid;
+  border-width: 0 7px 7px 0;
+  border-color: transparent var(--ssh-witch) transparent transparent;
+  border-top-right-radius: 6px;
+}
+
+.ssh-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: none;
+}
+.ssh-dot.on {
+  background: var(--ssh-slime);
+}
+.ssh-dot.lost {
+  background: var(--ssh-blood);
+}
+.ssh-dot.on.ka {
+  animation: ssh-ka var(--ka, 30s) ease-out infinite;
+}
+.ssh-dot.on.flicker {
+  animation: ssh-flicker 1.2s steps(1) 1;
+}
+@keyframes ssh-ka {
+  0%,
+  96%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  97% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ssh-pumpkin) 45%, transparent);
+  }
+}
+@keyframes ssh-flicker {
+  0%,
+  30%,
+  60% {
+    opacity: 1;
+  }
+  15%,
+  45% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ssh-dot.on.ka,
+  .ssh-dot.on.flicker {
+    animation: none;
+  }
+}
+
+.cli.ssh .cli-term {
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--ssh-witch) 55%, transparent);
+}
+
+.host-pop {
+  position: absolute;
+  top: 44px;
+  left: 190px;
+  z-index: 30;
+  width: 300px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.host-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.host-row:hover {
+  background: color-mix(in srgb, var(--ssh-witch) 14%, transparent);
+}
+.host-row .host-name {
+  color: var(--ssh-witch);
+  font-weight: 600;
+}
+.host-row .host-sub {
+  color: var(--muted);
+  font-size: 11px;
+}
+.host-row svg {
+  color: var(--ssh-witch);
+}
+
+.ssh-lost {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(2px);
+}
+.ssh-lost-card {
+  max-width: 360px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--ssh-blood) 55%, transparent);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ssh-lost-card h3 {
+  margin: 0;
+  letter-spacing: 0.08em;
+  color: var(--ssh-blood);
+}
+.ssh-lost-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.ssh-lost-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 4px;
+}
+.ssh-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  cursor: pointer;
+}
+.ssh-btn.primary {
+  background: var(--ssh-pumpkin);
+  border-color: var(--ssh-pumpkin);
+  color: var(--accent-ink, #1a0c02);
+  font-weight: 600;
+}
+.ssh-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.secret-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+}
+.secret-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.secret-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 44px;
+  z-index: 40;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--ssh-slime) 55%, transparent);
+  color: var(--fg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+.agent-note {
+  resize: vertical;
+  min-height: 72px;
+  font: inherit;
+  line-height: 1.4;
+}
+.note-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.note-actions .pop-hint {
+  margin-right: auto;
+}
+.cli.f13 .f13-mask {
+  position: absolute;
+  right: 28px;
+  bottom: 54px;
+  width: 120px;
+  height: 120px;
+  color: var(--ssh-bone);
+  opacity: 0.05;
+  pointer-events: none;
+}

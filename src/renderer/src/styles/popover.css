@@ -172,3 +172,21 @@
   flex-direction: column;
   gap: 4px;
 }
+
+/* Sensitive values (client id, secret names, hosts) stay blurred until hovered or focused. */
+.veil {
+  filter: blur(5px);
+  transition: filter 0.15s;
+}
+
+.veil:hover,
+.veil:focus,
+.veil:focus-within {
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .veil {
+    transition: none;
+  }
+}

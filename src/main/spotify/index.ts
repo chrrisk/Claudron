@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron'
-import { DUCK_VOLUME, type SpotifyCommand, type SpotifyState, type SpotifyTrack } from '@shared/spotify'
+import { DUCK_VOLUME, type SpotifyCommand, type SpotifyHit, type SpotifyState, type SpotifyTrack } from '@shared/spotify'
 import { broadcast } from '../ipc'
 import { getSettings } from '../settings-store'
 import { clearTokens, loadTokens, login, refresh, type Tokens } from './auth'
@@ -67,8 +67,14 @@ async function api<T>(method: string, path: string, body?: unknown): Promise<T |
     }
     throw new HttpError(res.status, reason)
   }
+  // Player commands can answer 200 with plain text (or nothing); only GETs carry JSON we use.
+  if (method !== 'GET') return null
   const text = await res.text()
-  return text ? (JSON.parse(text) as T) : null
+  try {
+    return text ? (JSON.parse(text) as T) : null
+  } catch {
+    return null
+  }
 }
 
 interface SpotifyImage {
@@ -243,6 +249,53 @@ export async function spotifyCommand(cmd: SpotifyCommand): Promise<void> {
         await api('PUT', '/me/player/play', { context_uri: uri })
       })
   }
+}
+
+interface SearchJson {
+  tracks?: { items: ({ uri: string; name: string; artists?: { name: string }[]; album?: { images?: SpotifyImage[] } } | null)[] }
+  playlists?: { items: ({ uri: string; name: string; owner?: { display_name?: string }; images?: SpotifyImage[] | null } | null)[] }
+}
+
+const smallArt = (images: SpotifyImage[] | null | undefined): string | null => {
+  const list = images ?? []
+  return [...list].sort((a, b) => (a.width ?? 0) - (b.width ?? 0)).find((i) => (i.width ?? 640) >= 40)?.url ?? list[0]?.url ?? null
+}
+
+export async function spotifySearch(query: string): Promise<SpotifyHit[]> {
+  const q = query.trim()
+  if (state.status !== 'connected' || !q) return []
+  try {
+    const res = await api<SearchJson>('GET', `/search?type=track,playlist&limit=5&q=${encodeURIComponent(q)}`)
+    const tracks: SpotifyHit[] = (res?.tracks?.items ?? [])
+      .filter((x): x is NonNullable<typeof x> => !!x)
+      .map((t) => ({ uri: t.uri, kind: 'track', title: t.name, sub: t.artists?.map((a) => a.name).join(', ') ?? '', artUrl: smallArt(t.album?.images) }))
+    const lists: SpotifyHit[] = (res?.playlists?.items ?? [])
+      .filter((x): x is NonNullable<typeof x> => !!x)
+      .map((p) => ({ uri: p.uri, kind: 'playlist', title: p.name, sub: `playlist · ${p.owner?.display_name ?? 'spotify'}`, artUrl: smallArt(p.images) }))
+    return [...tracks, ...lists]
+  } catch (err) {
+    patchConnected({ error: (err as Error).message })
+    return []
+  }
+}
+
+export async function spotifyPlay(hit: SpotifyHit): Promise<void> {
+  if (state.status !== 'connected') return
+  return control(() => api('PUT', '/me/player/play', hit.kind === 'track' ? { uris: [hit.uri] } : { context_uri: hit.uri }))
+}
+
+export async function spotifyVolume(percent: number): Promise<void> {
+  if (state.status !== 'connected') return
+  const v = Math.round(Math.min(100, Math.max(0, percent)))
+  patchConnected({ volume: v })
+  return control(() => api('PUT', `/me/player/volume?volume_percent=${v}`))
+}
+
+export async function spotifySeek(ms: number): Promise<void> {
+  if (state.status !== 'connected') return
+  const at = Math.max(0, Math.round(ms))
+  patchConnected({ progressMs: at, at: Date.now() })
+  return control(() => api('PUT', `/me/player/seek?position_ms=${at}`))
 }
 
 // ---------------------------------------------------------------------------

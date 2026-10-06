@@ -15,7 +15,11 @@ import {
   initSpotify,
   restoreVolumeOnQuit,
   setPermissionWaiting,
-  spotifyCommand
+  spotifyCommand,
+  spotifyPlay,
+  spotifySearch,
+  spotifySeek,
+  spotifyVolume
 } from './spotify'
 import { addSecret, listSecrets, removeSecret } from './secrets'
 import { readConfigHosts } from './ssh'
@@ -67,6 +71,10 @@ function registerIpc(): void {
   handle('spotify:connect', () => connectSpotify())
   handle('spotify:disconnect', () => disconnectSpotify())
   handle('spotify:command', (cmd) => spotifyCommand(cmd))
+  handle('spotify:search', (q) => spotifySearch(q))
+  handle('spotify:play', (hit) => spotifyPlay(hit))
+  handle('spotify:volume', (pct) => spotifyVolume(pct))
+  handle('spotify:seek', (ms) => spotifySeek(ms))
 
   handle('ssh:config-hosts', () => readConfigHosts())
   handle('secrets:list', () => listSecrets())

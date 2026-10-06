@@ -1,7 +1,7 @@
 import type { AgentEnvelope, AgentEvent, AgentStartOptions, PermissionDecision, SessionSummary } from './agent'
 import type { PtyData, PtyExit, PtySpawnOptions, PtySpawnResult } from './pty'
 import type { Project, Settings } from './settings'
-import type { SpotifyCommand, SpotifyState } from './spotify'
+import type { SpotifyCommand, SpotifyHit, SpotifyState } from './spotify'
 import type { SecretMeta } from './ssh'
 import type { UpdateState } from './update'
 import type { UsageSnapshot } from './usage'
@@ -32,6 +32,10 @@ export interface InvokeMap {
   'spotify:connect': { args: []; result: void }
   'spotify:disconnect': { args: []; result: void }
   'spotify:command': { args: [cmd: SpotifyCommand]; result: void }
+  'spotify:search': { args: [query: string]; result: SpotifyHit[] }
+  'spotify:play': { args: [hit: SpotifyHit]; result: void }
+  'spotify:volume': { args: [percent: number]; result: void }
+  'spotify:seek': { args: [ms: number]; result: void }
   'ssh:config-hosts': { args: []; result: string[] }
   'secrets:list': { args: []; result: SecretMeta[] }
   'secrets:add': {
@@ -91,6 +95,10 @@ export const INVOKE_CHANNELS: Record<keyof InvokeMap, true> = {
   'spotify:connect': true,
   'spotify:disconnect': true,
   'spotify:command': true,
+  'spotify:search': true,
+  'spotify:play': true,
+  'spotify:volume': true,
+  'spotify:seek': true,
   'ssh:config-hosts': true,
   'secrets:list': true,
   'secrets:add': true,

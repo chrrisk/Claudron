@@ -96,7 +96,7 @@ function SpotifySettings(): React.JSX.Element {
       <label className="pop-field">
         <span className="pop-hint">Client id (from developer.spotify.com, no secret needed)</span>
         <input
-          className="pop-input"
+          className="pop-input veil"
           spellCheck={false}
           placeholder="paste client id"
           defaultValue={settings.spotifyClientId}

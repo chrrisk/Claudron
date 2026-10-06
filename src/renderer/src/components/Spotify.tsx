@@ -1,8 +1,7 @@
-import { formatClock } from '@shared/spotify'
-import { liveProgress, spotify, useSpotify } from '../store/spotify'
-import { useHaunt } from '../lib/haunt'
+import { useEffect, useRef, useState } from 'react'
+import { formatClock, type SpotifyHit } from '@shared/spotify'
+import { liveProgress, spotify, spotifyPlay, spotifySearch, spotifySeek, spotifyVolume, useSpotify } from '../store/spotify'
 import { useTicker } from '../lib/hooks'
-import { GhostIcon } from './icons'
 
 /** Placeholder art from the mockup: moon over violet hills. */
 function ArtPlaceholder({ size, round }: { size: number; round?: boolean }): React.JSX.Element {
@@ -42,6 +41,83 @@ const PlayIcon = (): React.JSX.Element => (
   </svg>
 )
 
+function SearchBox(): React.JSX.Element {
+  const [q, setQ] = useState('')
+  const [hits, setHits] = useState<SpotifyHit[]>([])
+  const seq = useRef(0)
+  useEffect(() => {
+    const text = q.trim()
+    const id = ++seq.current
+    if (!text) {
+      setHits([])
+      return
+    }
+    const t = window.setTimeout(() => {
+      void spotifySearch(text).then((r) => id === seq.current && setHits(r))
+    }, 300)
+    return () => window.clearTimeout(t)
+  }, [q])
+  return (
+    <div className="sp-search">
+      <input
+        className="pop-input"
+        spellCheck={false}
+        placeholder="Search songs and playlists"
+        aria-label="Search Spotify"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        onKeyDown={(e) => e.key === 'Escape' && setQ('')}
+      />
+      {hits.length > 0 && (
+        <ul className="sp-hits">
+          {hits.map((h) => (
+            <li key={h.uri}>
+              <button
+                onClick={() => {
+                  void spotifyPlay(h)
+                  setQ('')
+                }}
+              >
+                <Art url={h.artUrl} size={28} />
+                <span className="sp-hit-text">
+                  <span className="sp-hit-title">{h.title}</span>
+                  <span className="sp-hit-sub">{h.sub}</span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function VolumeBar({ value }: { value: number }): React.JSX.Element {
+  const [drag, setDrag] = useState<number | null>(null)
+  return (
+    <label className="sp-volume">
+      <span className="mono">VOL</span>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        aria-label="Volume"
+        value={drag ?? value}
+        onChange={(e) => setDrag(Number(e.target.value))}
+        onPointerUp={() => {
+          if (drag !== null) void spotifyVolume(drag)
+          setDrag(null)
+        }}
+        onKeyUp={() => {
+          if (drag !== null) void spotifyVolume(drag)
+          setDrag(null)
+        }}
+      />
+      <span className="mono">{drag ?? value}</span>
+    </label>
+  )
+}
+
 function NotConnected(): React.JSX.Element {
   const s = useSpotify((x) => x.state)
   const noId = s.status === 'no-client-id'
@@ -73,7 +149,6 @@ function NotConnected(): React.JSX.Element {
 
 export function SpotifyCard(): React.JSX.Element {
   const s = useSpotify((x) => x.state)
-  const { spooky } = useHaunt()
   useTicker(1000, s.status === 'connected' && s.playing)
 
   if (s.status !== 'connected') return <NotConnected />
@@ -96,7 +171,19 @@ export function SpotifyCard(): React.JSX.Element {
         </div>
       </div>
       <div className="progress">
-        <div className="progress-bar">
+        <div
+          className="progress-bar seekable"
+          role="slider"
+          aria-label="Seek"
+          aria-valuemin={0}
+          aria-valuemax={dur}
+          aria-valuenow={progress}
+          onClick={(e) => {
+            if (!dur) return
+            const r = e.currentTarget.getBoundingClientRect()
+            void spotifySeek(((e.clientX - r.left) / r.width) * dur)
+          }}
+        >
           <div style={{ width: dur ? `${(progress / dur) * 100}%` : 0 }} />
         </div>
         <div className="progress-times mono">
@@ -116,13 +203,9 @@ export function SpotifyCard(): React.JSX.Element {
           <NextIcon />
         </button>
       </div>
+      <VolumeBar value={s.volume ?? 50} />
+      <SearchBox />
       {s.error && <div className="spotify-error">{s.error}</div>}
-      {spooky && (
-        <button className="spooky-btn" onClick={() => spotify('spooky')}>
-          <GhostIcon />
-          Summon a spooky playlist
-        </button>
-      )}
     </div>
   )
 }

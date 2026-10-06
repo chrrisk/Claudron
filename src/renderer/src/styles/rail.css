@@ -323,3 +323,81 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.progress-bar.seekable {
+  cursor: pointer;
+}
+
+.sp-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.sp-volume input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+.sp-search {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sp-search .pop-input {
+  height: 30px;
+}
+
+.sp-hits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sp-hits button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sp-hits button:hover,
+.sp-hits button:focus-visible {
+  background: var(--line);
+}
+
+.sp-hit-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sp-hit-title,
+.sp-hit-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-hit-title {
+  font-size: 12px;
+}
+
+.sp-hit-sub {
+  font-size: 10px;
+  color: var(--muted);
+}

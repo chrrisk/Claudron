@@ -56,9 +56,9 @@ export function RemoteSettings(): React.JSX.Element {
       )}
       {hosts.map((h) => (
         <div key={h.id} className="secret-row">
-          <span className="mono">{h.label}</span>
+          <span className="mono veil">{h.label}</span>
           <input
-            className="pop-input"
+            className="pop-input veil"
             spellCheck={false}
             placeholder="start folder"
             aria-label={`Start folder for ${h.label}`}

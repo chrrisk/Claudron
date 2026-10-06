@@ -25,6 +25,14 @@ export type SpotifyState =
       error: string | null
     }
 
+export interface SpotifyHit {
+  uri: string
+  kind: 'track' | 'playlist'
+  title: string
+  sub: string
+  artUrl: string | null
+}
+
 export type SpotifyCommand = 'toggle' | 'next' | 'previous' | 'spooky'
 
 export const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing'

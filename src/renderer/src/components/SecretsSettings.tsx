@@ -39,8 +39,8 @@ export function SecretsSettings(): React.JSX.Element {
       </span>
       {items.map((s) => (
         <div key={s.id} className="secret-row">
-          <span className="mono">{s.name}</span>
-          <span className="pop-hint">{scopeName(s.scope)}</span>
+          <span className="mono veil">{s.name}</span>
+          <span className="pop-hint veil">{scopeName(s.scope)}</span>
           <span className="mono" style={{ color: 'var(--muted)' }}>
             ••••••••
           </span>
@@ -51,7 +51,7 @@ export function SecretsSettings(): React.JSX.Element {
       ))}
       <div className="secret-form">
         <input
-          className="pop-input"
+          className="pop-input veil"
           autoComplete="off"
           spellCheck={false}
           placeholder="name, e.g. SUDO_PASS or GITHUB_TOKEN"
@@ -74,7 +74,7 @@ export function SecretsSettings(): React.JSX.Element {
           <input type="checkbox" checked={shown} onChange={() => setShown((x) => !x)} />
           Show
         </label>
-        <select className="pop-input" aria-label="Use on" value={scope} onChange={(e) => setScope(e.target.value)}>
+        <select className="pop-input veil" aria-label="Use on" value={scope} onChange={(e) => setScope(e.target.value)}>
           <option value="all">Use on: all hosts</option>
           {hosts.map((h) => (
             <option key={h.id} value={h.id}>
@@ -95,7 +95,7 @@ export function SecretsSettings(): React.JSX.Element {
         <label className="pop-field">
           <span className="pop-hint">Which one is your sudo password?</span>
           <select
-            className="pop-input"
+            className="pop-input veil"
             aria-label="Sudo password secret"
             value={sudoSecret}
             onChange={(e) => update({ sudoSecret: e.target.value })}

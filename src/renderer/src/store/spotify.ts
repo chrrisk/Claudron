@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { SpotifyCommand, SpotifyState } from '@shared/spotify'
+import type { SpotifyCommand, SpotifyHit, SpotifyState } from '@shared/spotify'
 
 export const useSpotify = create<{ state: SpotifyState }>(() => ({ state: { status: 'disconnected' } }))
 
@@ -11,6 +11,11 @@ export async function hydrateSpotify(): Promise<void> {
 export function spotify(cmd: SpotifyCommand): void {
   void window.claudron.invoke('spotify:command', cmd)
 }
+
+export const spotifySearch = (q: string): Promise<SpotifyHit[]> => window.claudron.invoke('spotify:search', q)
+export const spotifyPlay = (hit: SpotifyHit): Promise<void> => window.claudron.invoke('spotify:play', hit)
+export const spotifyVolume = (pct: number): Promise<void> => window.claudron.invoke('spotify:volume', pct)
+export const spotifySeek = (ms: number): Promise<void> => window.claudron.invoke('spotify:seek', ms)
 
 /** Progress ticks locally between the 3s polls while playing. */
 export function liveProgress(s: SpotifyState, now = Date.now()): number {

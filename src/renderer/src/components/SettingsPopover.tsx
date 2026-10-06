@@ -7,6 +7,7 @@ import { FONT_FAMILIES } from '../themes'
 import { AgentNoteSettings } from './AgentNoteSettings'
 import { RemoteSettings } from './RemoteSettings'
 import { SecretsSettings } from './SecretsSettings'
+import { UpdateSettings } from './UpdateSettings'
 import { UnleashedWarning } from './UnleashedWarning'
 
 const HAUNT: [HauntLevel, string][] = [
@@ -230,6 +231,11 @@ export function SettingsPopover({ onClose }: { onClose: () => void }): React.JSX
         <div className="pop-section">
           <span className="pop-heading">SECRETS</span>
           <SecretsSettings />
+        </div>
+
+        <div className="pop-section">
+          <span className="pop-heading">UPDATES</span>
+          <UpdateSettings />
         </div>
       </div>
       {warn && (

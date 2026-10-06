@@ -3,6 +3,7 @@ import type { PtyData, PtyExit, PtySpawnOptions, PtySpawnResult } from './pty'
 import type { Project, Settings } from './settings'
 import type { SpotifyCommand, SpotifyState } from './spotify'
 import type { SecretMeta } from './ssh'
+import type { UpdateState } from './update'
 import type { UsageSnapshot } from './usage'
 
 /**
@@ -38,6 +39,9 @@ export interface InvokeMap {
     result: { ok: true; secrets: SecretMeta[] } | { ok: false; error: string }
   }
   'secrets:remove': { args: [id: string]; result: SecretMeta[] }
+  'update:get': { args: []; result: UpdateState }
+  'update:check': { args: []; result: void }
+  'update:install': { args: []; result: void }
 }
 
 /** Fire-and-forget messages from renderer to main. */
@@ -62,6 +66,7 @@ export interface EventMap {
   'spotify:state': SpotifyState
   /** Claude used a stored secret over the askpass bridge. The value never travels. */
   'ssh:secret-used': { id: string; name: string; at: number }
+  'update:state': UpdateState
 }
 
 // Runtime allowlists. Typed as Record<keyof Map, true> so a missing key fails to compile.
@@ -89,7 +94,10 @@ export const INVOKE_CHANNELS: Record<keyof InvokeMap, true> = {
   'ssh:config-hosts': true,
   'secrets:list': true,
   'secrets:add': true,
-  'secrets:remove': true
+  'secrets:remove': true,
+  'update:get': true,
+  'update:check': true,
+  'update:install': true
 }
 
 export const SEND_CHANNELS: Record<keyof SendMap, true> = {
@@ -108,7 +116,8 @@ export const EVENT_CHANNELS: Record<keyof EventMap, true> = {
   'cli:status': true,
   'cli:event': true,
   'spotify:state': true,
-  'ssh:secret-used': true
+  'ssh:secret-used': true,
+  'update:state': true
 }
 
 export type Unsubscribe = () => void

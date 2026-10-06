@@ -19,6 +19,7 @@ import {
 } from './spotify'
 import { addSecret, listSecrets, removeSecret } from './secrets'
 import { readConfigHosts } from './ssh'
+import { checkForUpdates, getUpdateState, installUpdate } from './updater'
 import { getUsage, installCliTap, onCliEvent, refreshUsage, startUsagePolling, stopUsage } from './usage'
 import { applyWindowTheme, createMainWindow } from './window'
 
@@ -71,6 +72,9 @@ function registerIpc(): void {
   handle('secrets:list', () => listSecrets())
   handle('secrets:add', (name, value, scope) => addSecret(name, value, scope))
   handle('secrets:remove', (id) => removeSecret(id))
+  handle('update:get', () => getUpdateState())
+  handle('update:check', () => checkForUpdates())
+  handle('update:install', () => installUpdate())
 }
 
 /** Duck the music while any permission prompt waits, UI or CLI. */
@@ -109,6 +113,7 @@ if (!app.requestSingleInstanceLock()) {
     mainWindow = createMainWindow(getSettings().theme)
     mainWindow.on('closed', () => (mainWindow = null))
     maybeSnapshot(mainWindow)
+    void checkForUpdates()
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {

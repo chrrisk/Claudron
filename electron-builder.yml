@@ -52,4 +52,8 @@ linux:
   category: Development
   icon: build/icon.png
 
-publish: null
+publish:
+  provider: github
+  owner: chrrisk
+  repo: Claudron
+  releaseType: release

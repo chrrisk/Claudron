@@ -33,6 +33,7 @@
   display: flex;
   align-items: stretch;
   font-size: 12px;
+  font-family: var(--mono-font);
   border-top: 1px solid var(--line);
   background: var(--chrome);
   white-space: nowrap;
@@ -166,6 +167,14 @@
   flex: 1;
   min-width: 0;
   display: flex;
+  flex-direction: column;
+}
+
+.cli-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
 }
 
 /* idle decor: tea lights and a mini pumpkin, kept to the margins */
@@ -202,6 +211,6 @@
   opacity: 0.55;
   filter: drop-shadow(0 0 5px color-mix(in srgb, var(--ssh-pumpkin) 60%, transparent));
 }
-.tl-a { left: 7px; bottom: 44px; }
+.tl-a { left: 7px; bottom: 12px; }
 .tl-b { right: 30px; top: 16px; }
-.pk-a { right: 30px; bottom: 44px; }
+.pk-a { right: 30px; bottom: 12px; }

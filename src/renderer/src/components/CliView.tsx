@@ -64,20 +64,22 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
 
   return (
     <div className="cli-wrap">
-    <div className={`cli ${isSsh ? 'ssh' : ''} ${f13 ? 'f13' : ''}`}>
-      {f13 && isSsh && <HockeyMaskIcon className="f13-mask" aria-hidden />}
-      <Fog />
-      <TerminalBats />
-      {spooky && <Glow />}
-      <PumpkinBanner
-        where={isSsh ? project.path : [shortPath(project.path), branch].filter(Boolean).join(' · ')}
-        dismissed={typed}
-      />
-      <div className="cli-term" ref={hostRef} data-status={status} />
+      <div className="cli-main">
+        <div className={`cli ${isSsh ? 'ssh' : ''} ${f13 ? 'f13' : ''}`}>
+          {f13 && isSsh && <HockeyMaskIcon className="f13-mask" aria-hidden />}
+          <Fog />
+          <TerminalBats />
+          {spooky && <Glow />}
+          <PumpkinBanner
+            where={isSsh ? project.path : [shortPath(project.path), branch].filter(Boolean).join(' · ')}
+            dismissed={typed}
+          />
+          <div className="cli-term" ref={hostRef} data-status={status} />
+          {isSsh && <SshLost project={project} />}
+        </div>
+        {cliRail && <RightRail />}
+      </div>
       <StatusLine project={project} />
-      {isSsh && <SshLost project={project} />}
-    </div>
-    {cliRail && <RightRail />}
     </div>
   )
 }

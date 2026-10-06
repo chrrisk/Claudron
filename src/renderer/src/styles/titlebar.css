@@ -179,3 +179,18 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.tab-rename {
+  width: 110px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--fg);
+  font: inherit;
+  outline: none;
+}
+.tab-rename:focus {
+  border-color: var(--accent, var(--ssh-witch));
+}

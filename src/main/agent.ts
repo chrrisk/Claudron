@@ -23,6 +23,7 @@ import { bundledClaude } from './claude-path'
 import { broadcast } from './ipc'
 import { childEnv } from './pty'
 import { loadShellEnv } from './shell-env'
+import { getSettings } from './settings-store'
 
 type Sdk = typeof import('@anthropic-ai/claude-agent-sdk')
 let sdkPromise: Promise<Sdk> | null = null
@@ -148,6 +149,7 @@ class AgentSession {
       prompt: this.inbox,
       options: {
         cwd: this.opts.cwd,
+        model: getSettings().model || undefined,
         resume: this.opts.resume,
         permissionMode: sdkPermissionMode(mode),
         allowDangerouslySkipPermissions: mode === 'unleashed',
@@ -195,7 +197,8 @@ class AgentSession {
             sessionId: msg.session_id,
             model: msg.model,
             cwd: msg.cwd,
-            permissionMode: msg.permissionMode
+            permissionMode: msg.permissionMode,
+            commands: msg.slash_commands ?? []
           })
         }
         return

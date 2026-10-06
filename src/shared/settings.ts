@@ -40,6 +40,12 @@ export interface Settings {
   sshKeepaliveInterval: number
   /** "For the record" note appended to the system prompt of every Claude session, local and SSH. */
   agentNote: string
+  /** Name of the saved secret sudo should use on SSH hosts. Empty means none. */
+  sudoSecret: string
+  /** Claude Code model alias for new sessions. Empty means Claude Code's own default. */
+  model: string
+  /** Show the cauldron and Spotify card beside the terminal in CLI mode. */
+  cliRail: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -59,5 +65,8 @@ export const DEFAULT_SETTINGS: Settings = {
   sshHosts: [],
   sshKeepalive: true,
   sshKeepaliveInterval: 30,
-  agentNote: ''
+  agentNote: '',
+  sudoSecret: '',
+  model: '',
+  cliRail: false
 }

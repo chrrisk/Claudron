@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Project } from '@shared/settings'
 import { useSettings } from '../store/settings'
 import { CloseIcon, GearIcon, LogoMark, MoonIcon, PlusIcon, RemoteIcon, SunriseIcon } from './icons'
@@ -14,6 +15,17 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
   const settings = useSettings((s) => s.settings)
   const update = useSettings((s) => s.update)
   const isDark = settings.theme === 'dark'
+  const [editing, setEditing] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
+  const startRename = (p: Project): void => {
+    setDraft(p.name)
+    setEditing(p.id)
+  }
+  const commitRename = (p: Project): void => {
+    const name = draft.trim()
+    setEditing(null)
+    if (name && name !== p.name) update({ projects: settings.projects.map((x) => (x.id === p.id ? { ...x, name } : x)) })
+  }
   const activeProject = settings.projects.find((p) => p.id === settings.activeProjectId)
   const sshActive = !!activeProject?.ssh
   const isUi = settings.mode === 'ui' && !sshActive
@@ -52,15 +64,41 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
               role="tab"
               tabIndex={0}
               aria-selected={active}
-              title={p.path}
+              title={`${p.path}
+Double-click to rename`}
               className="tab"
               onClick={() => update({ activeProjectId: p.id })}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && update({ activeProjectId: p.id })}
+              onDoubleClick={() => startRename(p)}
+              onKeyDown={(e) => {
+                if (editing === p.id) return
+                if (e.key === 'F2') startRename(p)
+                else if (e.key === 'Enter' || e.key === ' ') update({ activeProjectId: p.id })
+              }}
               onAuxClick={(e) => e.button === 1 && closeProject(p)}
             >
               {p.ssh ? <SshDot id={p.id} /> : active && <span className="dot" />}
               {p.ssh && <HostChip />}
-              <span className="label">{p.name}</span>
+              {editing === p.id ? (
+                <input
+                  className="tab-rename"
+                  autoFocus
+                  aria-label="Tab name"
+                  maxLength={40}
+                  spellCheck={false}
+                  value={draft}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  onBlur={() => commitRename(p)}
+                  onKeyDown={(e) => {
+                    e.stopPropagation()
+                    if (e.key === 'Enter') commitRename(p)
+                    else if (e.key === 'Escape') setEditing(null)
+                  }}
+                />
+              ) : (
+                <span className="label">{p.name}</span>
+              )}
               <span
                 className="close"
                 role="button"

@@ -32,6 +32,13 @@ const SPOTIFY: [SpotifyPresence, string][] = [
   ['card', 'Card']
 ]
 
+const MODELS: [string, string][] = [
+  ['', 'Default'],
+  ['opus', 'Opus'],
+  ['sonnet', 'Sonnet'],
+  ['haiku', 'Haiku']
+]
+
 const PERMISSIONS: [ClaudronPermissionMode, string, string][] = [
   ['ask', 'Ask', 'Claude asks before running commands or editing files.'],
   ['acceptEdits', 'Accept edits', 'File edits go through. Commands still ask.'],
@@ -171,6 +178,12 @@ export function SettingsPopover({ onClose }: { onClose: () => void }): React.JSX
         </div>
 
         <div className="pop-section">
+          <span className="pop-heading">MODEL</span>
+          <Segmented label="Default model" options={MODELS} value={settings.model} onPick={set('model')} />
+          <span className="pop-hint">Used for new sessions. Reconnect or reopen a project to apply.</span>
+        </div>
+
+        <div className="pop-section">
           <span className="pop-heading">SOUND EFFECTS</span>
           <label className="pop-check">
             <input type="checkbox" checked={sounds.door} onChange={() => update({ doorSound: !sounds.door })} />
@@ -198,6 +211,10 @@ export function SettingsPopover({ onClose }: { onClose: () => void }): React.JSX
           <span className="pop-heading">SPOTIFY PRESENCE</span>
           <Segmented label="Spotify presence" options={SPOTIFY} value={settings.spotify} onPick={set('spotify')} />
           {settings.spotify !== 'off' && <SpotifySettings />}
+          <label className="pop-check">
+            <input type="checkbox" checked={settings.cliRail} onChange={() => update({ cliRail: !settings.cliRail })} />
+            Show cauldron and Spotify beside the terminal (CLI mode)
+          </label>
         </div>
 
         <div className="pop-section">

@@ -5,7 +5,7 @@ import type { ClaudronPermissionMode } from './settings'
  * event vocabulary so the UI only has to know about things it actually draws.
  */
 export type AgentEvent =
-  | { type: 'init'; sessionId: string; model: string; cwd: string; permissionMode: string }
+  | { type: 'init'; sessionId: string; model: string; cwd: string; permissionMode: string; commands: string[] }
   | { type: 'user'; id: string; text: string }
   | { type: 'text'; id: string; text: string }
   | { type: 'tool'; id: string; name: string; input: Record<string, unknown> }

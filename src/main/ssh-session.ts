@@ -3,12 +3,12 @@ import { homedir } from 'node:os'
 import { composeNotes } from '@shared/notes'
 import { permissionFlags, type PtySpawnOptions } from '@shared/pty'
 import {
-  SUDO_NOTE,
   buildRemoteCommand,
   buildRemoteScript,
   buildSshArgs,
   isValidTarget,
-  pickSecret,
+  secretsForHost,
+  secretsNote,
   splitTarget
 } from '@shared/ssh'
 import { broadcast } from './ipc'
@@ -48,7 +48,9 @@ export async function prepareSsh(opts: PtySpawnOptions): Promise<Launch> {
 
   let bridge: Bridge | null = null
   let remotePort = 0
-  if (pickSecret(await listSecrets(), 'SUDO', host.id)) {
+  const mine = secretsForHost(await listSecrets(), host.id)
+  const sudo = mine.find((m) => m.name.toLowerCase() === settings.sudoSecret.toLowerCase())?.name
+  if (mine.length) {
     bridge = await openBridge(
       (name) => secretValue(name, host.id),
       (name) => broadcast('ssh:secret-used', { id: opts.id, name, at: Date.now() })
@@ -59,13 +61,14 @@ export async function prepareSsh(opts: PtySpawnOptions): Promise<Launch> {
   const claudeArgs = [
     ...(opts.continueSession ? ['--continue'] : []),
     ...permissionFlags(opts.permissionMode),
-    ...composeNotes(settings.agentNote, bridge ? [SUDO_NOTE] : [])
+    ...(settings.model ? ['--model', settings.model] : []),
+    ...composeNotes(settings.agentNote, bridge ? [secretsNote(mine.map((m) => m.name), !!sudo)] : [])
   ]
   const script = buildRemoteScript({
     folder: host.folder,
     claudeArgs,
     sessionId: opts.id,
-    askpass: bridge ? { port: remotePort, token: bridge.token } : undefined
+    askpass: bridge ? { port: remotePort, token: bridge.token, sudo } : undefined
   })
   const args = buildSshArgs({
     host: target,

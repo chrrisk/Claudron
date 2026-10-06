@@ -14,6 +14,8 @@ import { StatusLine } from './StatusLine'
 import { Fog, TerminalBats } from './Haunting'
 import { PumpkinBanner } from './PumpkinBanner'
 import { SshLost } from './SshLost'
+import { Glow } from './Glow'
+import { RightRail } from './RightRail'
 import { HockeyMaskIcon } from './icons'
 import { isFriday13 } from '@shared/eggs'
 import { useHaunt } from '../lib/haunt'
@@ -23,6 +25,7 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
   const hostRef = useRef<HTMLDivElement>(null)
   const theme = useSettings((s) => s.settings.theme)
   const permissionMode = useSettings((s) => s.settings.permissionMode)
+  const cliRail = useSettings((s) => s.settings.cliRail)
   const [typed, setTyped] = useState(false)
   const [branch, setBranch] = useState<string | null>(null)
 
@@ -60,10 +63,12 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
   const status = useSyncExternalStore(subscribeTerminals, () => getTerminal(project.id)?.status ?? 'idle')
 
   return (
+    <div className="cli-wrap">
     <div className={`cli ${isSsh ? 'ssh' : ''} ${f13 ? 'f13' : ''}`}>
       {f13 && isSsh && <HockeyMaskIcon className="f13-mask" aria-hidden />}
       <Fog />
       <TerminalBats />
+      {spooky && <Glow />}
       <PumpkinBanner
         where={isSsh ? project.path : [shortPath(project.path), branch].filter(Boolean).join(' · ')}
         dismissed={typed}
@@ -71,6 +76,8 @@ export function CliView({ project }: { project: Project }): React.JSX.Element {
       <div className="cli-term" ref={hostRef} data-status={status} />
       <StatusLine project={project} />
       {isSsh && <SshLost project={project} />}
+    </div>
+    {cliRail && <RightRail />}
     </div>
   )
 }

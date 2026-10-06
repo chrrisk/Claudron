@@ -26,6 +26,8 @@ export interface Conversation {
   contextPct: number | null
   opened: boolean
   history: SessionSummary[]
+  /** Slash commands reported by Claude Code at session init. */
+  commands: string[]
 }
 
 export interface FinishedTask {
@@ -46,7 +48,8 @@ const empty = (): Conversation => ({
   model: null,
   contextPct: null,
   opened: false,
-  history: []
+  history: [],
+  commands: []
 })
 
 interface AgentState {
@@ -95,7 +98,7 @@ export function wireAgentEvents(): void {
   window.claudron.on('agent:event', ({ key, event }) => {
     switch (event.type) {
       case 'init':
-        patch(key, () => ({ sessionId: event.sessionId, model: event.model }))
+        patch(key, () => ({ sessionId: event.sessionId, model: event.model, commands: event.commands }))
         return
       case 'busy':
         patch(key, (c) => ({ busy: event.busy, turnStartedAt: event.busy ? (c.turnStartedAt ?? Date.now()) : null }))

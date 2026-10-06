@@ -737,3 +737,29 @@
   color: var(--fg);
   border: 1px solid var(--line-strong);
 }
+
+.cmd-menu {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  bottom: calc(100% - 20px);
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.cmd-item {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: var(--mono-font);
+  font-size: 13px;
+  color: var(--fg);
+  cursor: pointer;
+}
+.cmd-item[aria-selected='true'] {
+  background: var(--panel2);
+  color: var(--accent);
+}

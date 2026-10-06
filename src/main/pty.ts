@@ -108,6 +108,7 @@ function prepareLocal(opts: PtySpawnOptions): Launch {
   const args = [
     ...(opts.continueSession ? ['--continue'] : []),
     ...permissionFlags(opts.permissionMode),
+    ...(getSettings().model ? ['--model', getSettings().model] : []),
     ...composeNotes(getSettings().agentNote, []),
     ...extras.flatMap((e) => e.args)
   ]

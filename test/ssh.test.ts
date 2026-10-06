@@ -72,8 +72,10 @@ describe('remote script', () => {
   })
   it('installs the askpass helper only when asked, with no secret inside', () => {
     expect(buildRemoteScript(opts)).not.toContain('SUDO_ASKPASS')
-    const s = buildRemoteScript({ ...opts, askpass: { port: 41000, token: 'abc123' } })
+    const s = buildRemoteScript({ ...opts, askpass: { port: 41000, token: 'abc123', sudo: 'pw' } })
     expect(s).toContain('export SUDO_ASKPASS=')
+    expect(s).toContain('with-secret')
+    expect(buildRemoteScript({ ...opts, askpass: { port: 1, token: 't' } })).not.toContain('SUDO_ASKPASS')
     expect(s).toContain('umask 077')
     expect(buildAskpassScript(41000, 'abc123')).toContain('/dev/tcp/127.0.0.1/41000')
   })

@@ -161,3 +161,47 @@
     transition: none;
   }
 }
+
+.cli-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+/* idle decor: tea lights and a mini pumpkin, kept to the margins */
+.glow {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+.glow.tea {
+  width: 10px;
+  height: 14px;
+  display: block;
+}
+.glow.tea .cup {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 5px;
+  border-radius: 2px 2px 3px 3px;
+  background: color-mix(in srgb, var(--ssh-bone) 55%, transparent);
+}
+.glow.tea .flame {
+  position: absolute;
+  bottom: 5px;
+  left: 3px;
+  width: 4px;
+  height: 7px;
+  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+  background: var(--ssh-pumpkin);
+  box-shadow: 0 0 10px 3px color-mix(in srgb, var(--ssh-pumpkin) 55%, transparent);
+}
+.glow.pump {
+  opacity: 0.55;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--ssh-pumpkin) 60%, transparent));
+}
+.tl-a { left: 7px; bottom: 44px; }
+.tl-b { right: 14px; top: 12px; }
+.pk-a { right: 16px; bottom: 44px; }

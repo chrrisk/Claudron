@@ -73,19 +73,34 @@ export function buildSshArgs(o: SshArgOpts): string[] {
 }
 
 /** Runs on the remote. Holds the port and a per-session token, never the secret. */
-export function buildAskpassScript(port: number, token: string): string {
+export function buildAskpassScript(port: number, token: string, name = 'SUDO'): string {
   const inner =
     `exec 3<>/dev/tcp/127.0.0.1/${port} || exit 1; ` +
-    `printf '%s\\tSUDO\\n' ${shQuote(token)} >&3; ` +
+    `printf '%s\\t%s\\n' ${shQuote(token)} ${shQuote(name)} >&3; ` +
     `IFS= read -r l <&3; [ -n "$l" ] || exit 1; printf '%s\\n' "$l"`
   return `#!/bin/sh\nexec bash -c ${shQuote(inner)}\n`
+}
+
+/** `with-secret NAME cmd...` runs cmd with $NAME set to the saved value for that one command. */
+export function buildWithSecretScript(port: number, token: string): string {
+  const inner =
+    `exec 3<>/dev/tcp/127.0.0.1/${port} || exit 1; ` +
+    `printf '%s\\t%s\\n' ${shQuote(token)} "$1" >&3; ` +
+    `IFS= read -r l <&3; [ -n "$l" ] || exit 1; printf '%s' "$l"`
+  return (
+    `#!/bin/sh\n[ $# -ge 2 ] || { echo "usage: with-secret NAME command..." >&2; exit 2; }\n` +
+    `n="$1"; shift\n` +
+    `v=$(bash -c ${shQuote(inner)} _ "$n") || { echo "with-secret: no secret named $n" >&2; exit 1; }\n` +
+    `export "$n=$v"; exec "$@"\n`
+  )
 }
 
 export interface RemoteScriptOpts {
   folder: string
   claudeArgs: string[]
   sessionId: string
-  askpass?: { port: number; token: string }
+  /** `sudo` is the name of the secret sudo should use, if any. */
+  askpass?: { port: number; token: string; sudo?: string }
 }
 
 function folderExpr(raw: string): string | null {
@@ -100,11 +115,16 @@ function folderExpr(raw: string): string | null {
 export function buildRemoteScript(o: RemoteScriptOpts): string {
   const lines: string[] = []
   if (o.askpass) {
-    const file = `"$HOME/.claudron/askpass-${o.sessionId.replace(/[^a-zA-Z0-9]/g, '')}"`
-    const b64 = btoa(buildAskpassScript(o.askpass.port, o.askpass.token))
-    lines.push(
-      `mkdir -p "$HOME/.claudron" && (umask 077; printf %s ${b64} | base64 -d > ${file}) && chmod 700 ${file} && export SUDO_ASKPASS=${file}`
-    )
+    const dir = '"$HOME/.claudron"'
+    const id = o.sessionId.replace(/[^a-zA-Z0-9]/g, '')
+    const put = (name: string, body: string): string =>
+      `(umask 077; printf %s ${btoa(body)} | base64 -d > ${dir}/${name}) && chmod 700 ${dir}/${name}`
+    const parts = [`mkdir -p ${dir}`, put('with-secret', buildWithSecretScript(o.askpass.port, o.askpass.token))]
+    if (o.askpass.sudo) {
+      parts.push(put(`askpass-${id}`, buildAskpassScript(o.askpass.port, o.askpass.token, o.askpass.sudo)))
+      parts.push(`export SUDO_ASKPASS=${dir}/askpass-${id}`)
+    }
+    lines.push(parts.join(' && '))
   }
   const cd = folderExpr(o.folder)
   if (cd) lines.push(`cd ${cd} || echo "claudron: could not open that folder, staying in home" >&2`)
@@ -118,9 +138,24 @@ export function buildRemoteCommand(script: string): string {
   return `sh -c "$(echo ${btoa(script)} | base64 -d)"`
 }
 
-export const SUDO_NOTE =
-  'Claudron note: a sudo password is stored for this host. Run privileged commands as `sudo -A <command>`. ' +
-  'Never ask the user for the password and never try to read it.'
+export function secretsNote(names: string[], sudo: boolean): string {
+  const parts = ['Claudron note: the user saved secrets for this host that you can use but not read.']
+  if (sudo) parts.push('Run privileged commands as `sudo -A <command>`.')
+  parts.push(
+    `To use one, run \`~/.claudron/with-secret NAME command...\` (it sets $NAME for that command only). Available: ${names.join(', ')}.`
+  )
+  parts.push('Never ask the user for them and never try to print or read them.')
+  return parts.join(' ')
+}
+
+/** Secrets that apply to a host: host-scoped wins over "all" per name. */
+export function secretsForHost<T extends SecretMeta>(items: T[], hostId: string): T[] {
+  const names = [...new Set(items.map((i) => i.name.toLowerCase()))]
+  return names.flatMap((n) => {
+    const hit = pickSecret(items, n, hostId)
+    return hit ? [hit] : []
+  })
+}
 
 /** Host-scoped secrets win over "all". */
 export function pickSecret<T extends SecretMeta>(items: T[], name: string, hostId: string): T | null {

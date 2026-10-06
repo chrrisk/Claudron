@@ -83,7 +83,7 @@ Click the remote icon in the title bar, pick a host (saved, or from `~/.ssh/conf
 
 - Needs the system OpenSSH client locally and `claude` installed on the remote.
 - Settings > Remote: keepalive (a client-side ping so idle links are not dropped) and a start folder per host. Keepalive cannot beat a server that ends idle sessions on purpose.
-- Settings > Secrets: save a sudo password. Claude runs `sudo -A` and Claudron answers over a per-session loopback bridge, so the password never appears in the terminal, the environment or the transcript. Needs `bash` on the remote and `AllowTcpForwarding` on. This is not a sandbox: a determined agent on a host you gave it root on can still do harm.
+- Settings > Secrets: name your own secrets (any label, a value, which hosts). Claude gets them through a per-session loopback bridge: `sudo -A` for the one you pick as the sudo password, or `~/.claudron/with-secret NAME command` to set `$NAME` for a single command. Values never go in the terminal, your shell environment or the transcript. Needs `bash` on the remote and `AllowTcpForwarding` on. This is not a sandbox: a command that echoes its own env can still print a secret, and an agent with root on a host can do harm.
 - Settings > For the record: a note sent to every Claude session, local and SSH.
 
 ## Spotify setup

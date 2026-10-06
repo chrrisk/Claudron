@@ -106,16 +106,6 @@ function SpotifySettings(): React.JSX.Element {
       <span className="pop-hint">
         In your Spotify app settings, add this exact redirect URI: <span className="mono">{SPOTIFY_REDIRECT_URI}</span>
       </span>
-      <label className="pop-field">
-        <span className="pop-hint">Pinned spooky playlist (optional link)</span>
-        <input
-          className="pop-input"
-          spellCheck={false}
-          placeholder="open.spotify.com/playlist/..."
-          defaultValue={settings.spookyPlaylist}
-          onBlur={(e) => update({ spookyPlaylist: e.target.value.trim() })}
-        />
-      </label>
       {status === 'connected' && (
         <button className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => void window.claudron.invoke('spotify:disconnect')}>
           Disconnect Spotify

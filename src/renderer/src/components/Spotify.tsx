@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { SKELETONS_EVENT } from './SkeletonParty'
 import { formatClock, type SpotifyHit } from '@shared/spotify'
 import { liveProgress, spotify, spotifyPlay, spotifySearch, spotifySeek, spotifyVolume, useSpotify } from '../store/spotify'
 import { useTicker } from '../lib/hooks'
@@ -129,6 +130,57 @@ function VolumeBar({ value }: { value: number }): React.JSX.Element {
   )
 }
 
+const ShuffleIcon = (): React.JSX.Element => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
+  </svg>
+)
+const RepeatIcon = ({ one }: { one: boolean }): React.JSX.Element => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3" />
+    {one && <path d="M11 10h1v4" />}
+  </svg>
+)
+
+const HOLD_MS = 700
+
+/** Play/pause. Hold it for a surprise. */
+function PlayButton({ playing }: { playing: boolean }): React.JSX.Element {
+  const timer = useRef<number>(0)
+  const held = useRef(false)
+  const [holding, setHolding] = useState(false)
+  const cancel = (): void => {
+    window.clearTimeout(timer.current)
+    setHolding(false)
+  }
+  return (
+    <button
+      className={`round-btn play ${holding ? 'holding' : ''}`}
+      aria-label={playing ? 'Pause' : 'Play'}
+      onPointerDown={() => {
+        held.current = false
+        cancel()
+        setHolding(true)
+        timer.current = window.setTimeout(() => {
+          held.current = true
+          setHolding(false)
+          window.dispatchEvent(new Event(SKELETONS_EVENT))
+          spotify('skeletons')
+        }, HOLD_MS)
+      }}
+      onPointerUp={cancel}
+      onPointerLeave={cancel}
+      onClick={() => {
+        if (held.current) held.current = false
+        else spotify('toggle')
+      }}
+    >
+      <span className="play-glow" data-anim="flicker" aria-hidden="true" />
+      {playing ? <PauseIcon /> : <PlayIcon />}
+    </button>
+  )
+}
+
 function NotConnected(): React.JSX.Element {
   const s = useSpotify((x) => x.state)
   const noId = s.status === 'no-client-id'
@@ -203,15 +255,24 @@ export function SpotifyCard(): React.JSX.Element {
         </div>
       </div>
       <div className="transport">
+        <button className="mini-btn" aria-label="Shuffle" aria-pressed={s.shuffle} title="Shuffle" onClick={() => spotify('shuffle')}>
+          <ShuffleIcon />
+        </button>
         <button className="round-btn" aria-label="Previous track" onClick={() => spotify('previous')}>
           <PrevIcon />
         </button>
-        <button className="round-btn play" aria-label={s.playing ? 'Pause' : 'Play'} onClick={() => spotify('toggle')}>
-          <span className="play-glow" data-anim="flicker" aria-hidden="true" />
-          {s.playing ? <PauseIcon /> : <PlayIcon />}
-        </button>
+        <PlayButton playing={s.playing} />
         <button className="round-btn" aria-label="Next track" onClick={() => spotify('next')}>
           <NextIcon />
+        </button>
+        <button
+          className="mini-btn"
+          aria-label={`Repeat: ${s.repeat}`}
+          aria-pressed={s.repeat !== 'off'}
+          title={s.repeat === 'track' ? 'Repeat this song' : s.repeat === 'context' ? 'Repeat all' : 'Repeat off'}
+          onClick={() => spotify('repeat')}
+        >
+          <RepeatIcon one={s.repeat === 'track'} />
         </button>
       </div>
       <VolumeBar value={s.volume ?? 50} />

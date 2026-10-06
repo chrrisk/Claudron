@@ -1,3 +1,5 @@
+export type SpotifyRepeat = 'off' | 'context' | 'track'
+
 export interface SpotifyTrack {
   title: string
   artist: string
@@ -18,6 +20,8 @@ export type SpotifyState =
       /** Epoch ms of the poll that produced progressMs, so the UI can tick between polls. */
       at: number
       volume: number | null
+      shuffle: boolean
+      repeat: SpotifyRepeat
       /** Volume is lowered while a permission prompt waits. */
       ducked: boolean
       /** Set after a 403: play/pause/skip/volume need Premium. */
@@ -31,9 +35,11 @@ export interface SpotifyHit {
   title: string
   sub: string
   artUrl: string | null
+  /** Album a track plays from. Bare track uris wedge some desktop clients, so tracks play in their album. */
+  context: string | null
 }
 
-export type SpotifyCommand = 'toggle' | 'next' | 'previous' | 'spooky'
+export type SpotifyCommand = 'toggle' | 'next' | 'previous' | 'shuffle' | 'repeat' | 'skeletons'
 
 export const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing'
 

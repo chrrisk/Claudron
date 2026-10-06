@@ -11,6 +11,7 @@ import { HostPicker } from './components/HostPicker'
 import { SecretToast } from './components/SecretToast'
 import { SoundEffects } from './components/SoundEffects'
 import { SpotifyPill } from './components/Spotify'
+import { SkeletonParty } from './components/SkeletonParty'
 
 export function App(): React.JSX.Element {
   const settings = useSettings((s) => s.settings)
@@ -67,6 +68,7 @@ export function App(): React.JSX.Element {
       />
       <SoundEffects />
       <SecretToast />
+      <SkeletonParty />
       {settingsOpen && <SettingsPopover onClose={() => setSettingsOpen(false)} />}
       {hostsOpen && <HostPicker onClose={() => setHostsOpen(false)} />}
       <main className="app-body">

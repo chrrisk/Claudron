@@ -1,0 +1,109 @@
+.skeleton-party {
+  position: fixed;
+  right: 40px;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  animation: sk-rise 0.5s ease-out;
+}
+
+.sk-rainbow {
+  overflow: visible;
+  filter: drop-shadow(0 0 10px currentColor);
+  animation: sk-hue 1.4s linear infinite;
+}
+
+.sk-body {
+  transform-origin: 60px 118px;
+  animation: sk-sway 0.55s ease-in-out infinite alternate;
+}
+
+.sk-arm {
+  animation: sk-floss 0.55s ease-in-out infinite alternate;
+}
+
+.sk-arm-l {
+  transform-origin: 44px 56px;
+}
+
+.sk-arm-r {
+  transform-origin: 76px 56px;
+  animation-direction: alternate-reverse;
+}
+
+.sk-caption {
+  margin-top: 4px;
+  font-family: var(--mono-font);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+@keyframes sk-hue {
+  from {
+    filter: drop-shadow(0 0 10px #ff3b3b) hue-rotate(0deg);
+  }
+  to {
+    filter: drop-shadow(0 0 10px #ff3b3b) hue-rotate(360deg);
+  }
+}
+
+@keyframes sk-sway {
+  from {
+    transform: translateX(-14px) rotate(-5deg);
+  }
+  to {
+    transform: translateX(14px) rotate(5deg);
+  }
+}
+
+@keyframes sk-floss {
+  from {
+    transform: rotate(-35deg);
+  }
+  to {
+    transform: rotate(35deg);
+  }
+}
+
+@keyframes sk-rise {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* The play button spins while held, faster the longer you hold. */
+.round-btn.play.holding {
+  animation: sk-spin 0.7s ease-in forwards;
+}
+
+@keyframes sk-spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(1440deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-party,
+  .sk-rainbow,
+  .sk-body,
+  .sk-arm,
+  .round-btn.play.holding {
+    animation: none !important;
+  }
+  .sk-rainbow {
+    filter: drop-shadow(0 0 10px #ff3b3b);
+  }
+}

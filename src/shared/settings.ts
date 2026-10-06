@@ -34,8 +34,6 @@ export interface Settings {
   activeProjectId: string | null
   /** Spotify app client id (PKCE, no secret). Empty uses the build-time default, if any. */
   spotifyClientId: string
-  /** Playlist URI or link for the spooky button. Empty means search for one. */
-  spookyPlaylist: string
   sshHosts: SshHost[]
   /** Client-side ServerAliveInterval so idle connections are not dropped. */
   sshKeepalive: boolean
@@ -63,7 +61,6 @@ export const DEFAULT_SETTINGS: Settings = {
   projects: [],
   activeProjectId: null,
   spotifyClientId: '',
-  spookyPlaylist: '',
   sshHosts: [],
   sshKeepalive: true,
   sshKeepaliveInterval: 30,

@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron'
-import { DUCK_VOLUME, type SpotifyCommand, type SpotifyHit, type SpotifyState, type SpotifyTrack } from '@shared/spotify'
+import { DUCK_VOLUME, type SpotifyCommand, type SpotifyHit, type SpotifyRepeat, type SpotifyState, type SpotifyTrack } from '@shared/spotify'
 import { broadcast } from '../ipc'
 import { getSettings } from '../settings-store'
 import { clearTokens, loadTokens, login, refresh, type Tokens } from './auth'
@@ -85,6 +85,8 @@ interface SpotifyImage {
 interface PlaybackJson {
   is_playing: boolean
   progress_ms: number | null
+  shuffle_state?: boolean
+  repeat_state?: SpotifyRepeat
   device?: { volume_percent: number | null; supports_volume?: boolean }
   item?: {
     name: string
@@ -122,6 +124,8 @@ async function poll(): Promise<void> {
       progressMs: p?.progress_ms ?? 0,
       at: Date.now(),
       volume: p?.device?.volume_percent ?? null,
+      shuffle: p?.shuffle_state ?? false,
+      repeat: p?.repeat_state ?? 'off',
       ducked: duck !== null,
       premiumRequired: base?.premiumRequired ?? false,
       error: null
@@ -156,7 +160,7 @@ export async function initSpotify(): Promise<void> {
     emit({ status: 'disconnected' })
     return
   }
-  emit({ status: 'connected', playing: false, track: null, progressMs: 0, at: Date.now(), volume: null, ducked: false, premiumRequired: false, error: null })
+  emit({ status: 'connected', playing: false, track: null, progressMs: 0, at: Date.now(), volume: null, shuffle: false, repeat: 'off', ducked: false, premiumRequired: false, error: null })
   await poll()
   schedulePoll()
   if (!focusHooked) {
@@ -179,7 +183,7 @@ export async function connectSpotify(): Promise<void> {
   emit({ status: 'connecting' })
   try {
     tokens = await login(id)
-    emit({ status: 'connected', playing: false, track: null, progressMs: 0, at: Date.now(), volume: null, ducked: false, premiumRequired: false, error: null })
+    emit({ status: 'connected', playing: false, track: null, progressMs: 0, at: Date.now(), volume: null, shuffle: false, repeat: 'off', ducked: false, premiumRequired: false, error: null })
     await poll()
     schedulePoll()
   } catch {
@@ -211,25 +215,6 @@ async function control(fn: () => Promise<unknown>): Promise<void> {
   }
 }
 
-/** Accepts spotify:playlist:ID or an open.spotify.com/playlist/ID link. */
-function playlistUri(input: string): string | null {
-  const s = input.trim()
-  if (/^spotify:playlist:[A-Za-z0-9]+$/.test(s)) return s
-  const m = /open\.spotify\.com\/(?:intl-[a-z]+\/)?playlist\/([A-Za-z0-9]+)/.exec(s)
-  return m ? `spotify:playlist:${m[1]}` : null
-}
-
-async function spookyPlaylist(): Promise<string | null> {
-  const pinned = playlistUri(getSettings().spookyPlaylist)
-  if (pinned) return pinned
-  const res = await api<{ playlists: { items: ({ uri: string } | null)[] } }>(
-    'GET',
-    '/search?type=playlist&limit=20&q=halloween'
-  )
-  const items = (res?.playlists.items ?? []).filter((x): x is { uri: string } => !!x)
-  return items.length ? items[Math.floor(Math.random() * items.length)].uri : null
-}
-
 export async function spotifyCommand(cmd: SpotifyCommand): Promise<void> {
   if (state.status !== 'connected') return
   const playing = state.playing
@@ -241,18 +226,29 @@ export async function spotifyCommand(cmd: SpotifyCommand): Promise<void> {
       return control(() => api('POST', '/me/player/next'))
     case 'previous':
       return control(() => api('POST', '/me/player/previous'))
-    case 'spooky':
+    case 'shuffle': {
+      const on = !state.shuffle
+      patchConnected({ shuffle: on })
+      return control(() => api('PUT', `/me/player/shuffle?state=${on}`))
+    }
+    case 'repeat': {
+      const next: SpotifyRepeat = state.repeat === 'off' ? 'context' : state.repeat === 'context' ? 'track' : 'off'
+      patchConnected({ repeat: next })
+      return control(() => api('PUT', `/me/player/repeat?state=${next}`))
+    }
+    case 'skeletons':
       return control(async () => {
-        const uri = await spookyPlaylist()
-        if (!uri) throw new Error('No spooky playlist found')
-        await api('PUT', '/me/player/shuffle?state=true').catch(() => undefined)
-        await api('PUT', '/me/player/play', { context_uri: uri })
+        const hit = (await spotifySearch('spooky scary skeletons')).find((h) => h.kind === 'track')
+        if (!hit) throw new Error('Could not find the skeletons')
+        await playOnDevice(hit)
+        await api('PUT', '/me/player/repeat?state=track')
+        patchConnected({ repeat: 'track' })
       })
   }
 }
 
 interface SearchJson {
-  tracks?: { items: ({ uri: string; name: string; artists?: { name: string }[]; album?: { images?: SpotifyImage[] } } | null)[] }
+  tracks?: { items: ({ uri: string; name: string; artists?: { name: string }[]; album?: { uri?: string; images?: SpotifyImage[] } } | null)[] }
   playlists?: { items: ({ uri: string; name: string; owner?: { display_name?: string }; images?: SpotifyImage[] | null } | null)[] }
 }
 
@@ -265,13 +261,13 @@ export async function spotifySearch(query: string): Promise<SpotifyHit[]> {
   const q = query.trim()
   if (state.status !== 'connected' || !q) return []
   try {
-    const res = await api<SearchJson>('GET', `/search?type=track,playlist&limit=5&q=${encodeURIComponent(q)}`)
+    const res = await api<SearchJson>('GET', `/search?type=track,playlist&limit=10&q=${encodeURIComponent(q)}`)
     const tracks: SpotifyHit[] = (res?.tracks?.items ?? [])
       .filter((x): x is NonNullable<typeof x> => !!x)
-      .map((t) => ({ uri: t.uri, kind: 'track', title: t.name, sub: t.artists?.map((a) => a.name).join(', ') ?? '', artUrl: smallArt(t.album?.images) }))
+      .map((t) => ({ uri: t.uri, kind: 'track', title: t.name, sub: t.artists?.map((a) => a.name).join(', ') ?? '', artUrl: smallArt(t.album?.images), context: t.album?.uri ?? null }))
     const lists: SpotifyHit[] = (res?.playlists?.items ?? [])
       .filter((x): x is NonNullable<typeof x> => !!x)
-      .map((p) => ({ uri: p.uri, kind: 'playlist', title: p.name, sub: `playlist · ${p.owner?.display_name ?? 'spotify'}`, artUrl: smallArt(p.images) }))
+      .map((p) => ({ uri: p.uri, kind: 'playlist', title: p.name, sub: `playlist · ${p.owner?.display_name ?? 'spotify'}`, artUrl: smallArt(p.images), context: null }))
     return [...tracks, ...lists]
   } catch (err) {
     patchConnected({ error: (err as Error).message })
@@ -279,9 +275,20 @@ export async function spotifySearch(query: string): Promise<SpotifyHit[]> {
   }
 }
 
+/** Targets a device explicitly: a bare play can be accepted and still start nothing when none is active. */
+async function playOnDevice(hit: SpotifyHit): Promise<void> {
+  const devs = await api<{ devices: { id: string | null; is_active: boolean; is_restricted: boolean }[] }>('GET', '/me/player/devices')
+  const list = (devs?.devices ?? []).filter((d) => d.id && !d.is_restricted)
+  const dev = list.find((d) => d.is_active) ?? list[0]
+  if (!dev) throw new HttpError(404, 'no device')
+  const body =
+    hit.kind === 'playlist' ? { context_uri: hit.uri } : hit.context ? { context_uri: hit.context, offset: { uri: hit.uri } } : { uris: [hit.uri] }
+  await api('PUT', `/me/player/play?device_id=${encodeURIComponent(dev.id!)}`, body)
+}
+
 export async function spotifyPlay(hit: SpotifyHit): Promise<void> {
   if (state.status !== 'connected') return
-  return control(() => api('PUT', '/me/player/play', hit.kind === 'track' ? { uris: [hit.uri] } : { context_uri: hit.uri }))
+  return control(() => playOnDevice(hit))
 }
 
 export async function spotifyVolume(percent: number): Promise<void> {

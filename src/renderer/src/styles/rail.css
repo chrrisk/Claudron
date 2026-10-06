@@ -352,7 +352,14 @@
   height: 30px;
 }
 
+/* rail cards must not be squashed by the flex column when results open */
+.rail-card {
+  flex-shrink: 0;
+}
+
 .sp-hits {
+  max-height: 220px;
+  overflow-y: auto;
   list-style: none;
   margin: 0;
   padding: 0;

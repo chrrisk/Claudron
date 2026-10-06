@@ -16,8 +16,19 @@ function ArtPlaceholder({ size, round }: { size: number; round?: boolean }): Rea
 }
 
 function Art({ url, size, round }: { url: string | null | undefined; size: number; round?: boolean }): React.JSX.Element {
-  if (!url) return <ArtPlaceholder size={size} round={round} />
-  return <img src={url} width={size} height={size} alt="" className="art" style={{ borderRadius: round ? '50%' : 6 }} />
+  const [failed, setFailed] = useState(false)
+  if (!url || failed) return <ArtPlaceholder size={size} round={round} />
+  return (
+    <img
+      src={url}
+      width={size}
+      height={size}
+      alt=""
+      className="art"
+      style={{ borderRadius: round ? '50%' : 6 }}
+      onError={() => setFailed(true)}
+    />
+  )
 }
 
 const PrevIcon = (): React.JSX.Element => (

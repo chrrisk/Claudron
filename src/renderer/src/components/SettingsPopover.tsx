@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { HauntLevel, Settings, SpotifyPresence, UiFont, ClaudronPermissionMode } from '@shared/settings'
 import { soundDefaults } from '@shared/sounds'
+import { SPOTIFY_REDIRECT_URI } from '@shared/spotify'
 import { useSettings } from '../store/settings'
 import { useSpotify } from '../store/spotify'
 import { FONT_FAMILIES } from '../themes'
@@ -102,6 +103,9 @@ function SpotifySettings(): React.JSX.Element {
           onBlur={(e) => e.target.value.trim() !== settings.spotifyClientId && update({ spotifyClientId: e.target.value.trim() })}
         />
       </label>
+      <span className="pop-hint">
+        In your Spotify app settings, add this exact redirect URI: <span className="mono">{SPOTIFY_REDIRECT_URI}</span>
+      </span>
       <label className="pop-field">
         <span className="pop-hint">Pinned spooky playlist (optional link)</span>
         <input

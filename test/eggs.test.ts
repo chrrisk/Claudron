@@ -15,6 +15,7 @@ describe('eggs', () => {
     expect(hostEgg('Crystal-Lake')).toBe('mask')
     expect(hostEgg('haddonfield')).toBe('pumpkin')
     expect(hostEgg('derry')).toBe('balloon')
+    expect(hostEgg('Tanglewood')).toBe('emf')
     expect(hostEgg('devbox')).toBeNull()
   })
 })

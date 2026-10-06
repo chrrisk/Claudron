@@ -149,6 +149,17 @@ export function GhostIcon(props: P): React.JSX.Element {
   )
 }
 
+/** EMF reader: five LEDs, the top ones lit. */
+export function EmfIcon(props: P): React.JSX.Element {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <rect x="6" y="2.5" width="12" height="19" rx="2.5" />
+      <path d="M10 6.5h4M10 10h4M10 13.5h4" />
+      <circle cx="12" cy="17.7" r="1" fill="currentColor" />
+    </svg>
+  )
+}
+
 export const BAT_PATH =
   'M12 4L12.8 2.2 13.4 4.2Q16 3 18 1Q19 4 24 4Q21 5 21 8Q19 6.5 17 8Q15 6.5 13.5 9L12 11 10.5 9Q9 6.5 7 8Q5 6.5 3 8Q3 5 0 4Q5 4 6 1Q8 3 10.6 4.2L11.2 2.2z'
 

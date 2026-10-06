@@ -4,12 +4,13 @@ import { hostIdFor, hostLabel, isValidTarget, sshDisplay, type SshHost } from '@
 import { useSettings } from '../store/settings'
 import { hostEgg } from '@shared/eggs'
 import { useHaunt } from '../lib/haunt'
-import { GhostIcon, HockeyMaskIcon, LogoMark } from './icons'
+import { EmfIcon, GhostIcon, HockeyMaskIcon, LogoMark } from './icons'
 
 function HostIcon({ label }: { label: string }): React.JSX.Element {
   const { spooky } = useHaunt()
   const egg = spooky ? hostEgg(label) : null
   if (egg === 'mask') return <HockeyMaskIcon />
+  if (egg === 'emf') return <EmfIcon />
   if (egg === 'pumpkin') return <LogoMark size={16} />
   if (egg === 'balloon') {
     return <span aria-hidden="true" style={{ width: 11, height: 14, borderRadius: '50%', background: 'var(--ssh-blood)' }} />

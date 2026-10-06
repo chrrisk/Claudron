@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { SUDO_UNLUCKY } from '@shared/eggs'
+import { SUDO_SPIRIT, SUDO_UNLUCKY } from '@shared/eggs'
 import { useHaunt } from '../lib/haunt'
 
 export function SecretToast(): React.JSX.Element | null {
@@ -14,7 +14,9 @@ export function SecretToast(): React.JSX.Element | null {
         setMsg(
           spooky && n === SUDO_UNLUCKY
             ? 'Unlucky for some.'
-            : `Claude used your saved ${name === 'SUDO' ? 'sudo password' : name}${spooky ? ' (it never saw it)' : ''}`
+            : spooky && n === SUDO_SPIRIT
+              ? 'Spirit box: "...sudo..."'
+              : `Claude used your saved ${name === 'SUDO' ? 'sudo password' : name}${spooky ? ' (it never saw it)' : ''}`
         )
         window.clearTimeout(timer.current)
         timer.current = window.setTimeout(() => setMsg(null), 2800)

@@ -9,14 +9,15 @@ export function SshLost({ project }: { project: Project }): React.JSX.Element | 
   const status = useSyncExternalStore(subscribeTerminals, () => getTerminal(project.id)?.status ?? 'idle')
   const mode = useSettings((s) => s.settings.permissionMode)
   const code = getTerminal(project.id)?.exitCode
-  const { spooky } = useHaunt()
+  const { spooky, full } = useHaunt()
   const f13 = spooky && isFriday13(new Date())
+  const hunt = full && !f13
   if (status !== 'exited' && status !== 'error') return null
   const unreachable = code === 255
   return (
     <div className="ssh-lost" role="alertdialog" aria-label="Connection lost">
       <div className="ssh-lost-card">
-        <h3>{f13 ? 'ki ki ki ma ma ma' : 'CONNECTION LOST'}</h3>
+        <h3>{f13 ? 'ki ki ki ma ma ma' : hunt ? 'THE HUNT BEGAN' : 'CONNECTION LOST'}</h3>
         <p>
           {unreachable
             ? 'ssh could not connect or the link dropped. Check the host, your network and your keys.'
@@ -24,14 +25,14 @@ export function SshLost({ project }: { project: Project }): React.JSX.Element | 
         </p>
         <div className="ssh-lost-actions">
           <button className="ssh-btn primary" onClick={() => void reconnectTerminal(project.id, mode)}>
-            {f13 ? 'Run to the cabin' : 'Reconnect'}
+            {f13 ? 'Run to the cabin' : hunt ? 'Hide in the closet' : 'Reconnect'}
           </button>
           <button
             className="ssh-btn"
             onClick={() => void reconnectTerminal(project.id, mode, true)}
             title="Skip --continue, start a new conversation"
           >
-            Start fresh
+            {hunt ? 'Cleanse the room' : 'Start fresh'}
           </button>
         </div>
       </div>

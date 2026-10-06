@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Project } from '@shared/settings'
 import { useSettings } from '../store/settings'
 import { CloseIcon, GearIcon, LogoMark, MoonIcon, PlusIcon, RemoteIcon, SunriseIcon } from './icons'
 import { HostChip, SshDot } from './SshBadge'
+import { ProfileMenu } from './ProfileMenu'
 
 interface Props {
   settingsOpen: boolean
@@ -17,6 +18,12 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
   const isDark = settings.theme === 'dark'
   const [editing, setEditing] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
+  const [profilesOpen, setProfilesOpen] = useState(false)
+  const [armed, setArmed] = useState<string | null>(null)
+  const armTimer = useRef(0)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dropAt, setDropAt] = useState<{ id: string; after: boolean } | null>(null)
+  useEffect(() => () => window.clearTimeout(armTimer.current), [])
   const startRename = (p: Project): void => {
     setDraft(p.name)
     setEditing(p.id)
@@ -52,6 +59,29 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
     update({ projects: [...settings.projects, copy], activeProjectId: copy.id })
   }
 
+  /** Closing a tab drops its terminal view, so the first click only arms it. */
+  const requestClose = (p: Project): void => {
+    window.clearTimeout(armTimer.current)
+    if (armed === p.id) {
+      setArmed(null)
+      closeProject(p)
+      return
+    }
+    setArmed(p.id)
+    armTimer.current = window.setTimeout(() => setArmed(null), 3000)
+  }
+
+  const moveTab = (fromId: string, toId: string, after: boolean): void => {
+    if (fromId === toId) return
+    const from = settings.projects.find((x) => x.id === fromId)
+    if (!from) return
+    const rest = settings.projects.filter((x) => x.id !== fromId)
+    const at = rest.findIndex((x) => x.id === toId)
+    if (at < 0) return
+    rest.splice(after ? at + 1 : at, 0, from)
+    update({ projects: rest })
+  }
+
   const closeProject = (p: Project): void => {
     const projects = settings.projects.filter((x) => x.id !== p.id)
     const activeProjectId =
@@ -77,7 +107,29 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
               aria-selected={active}
               title={`${p.path}
 Double-click or F2 to rename${p.ssh ? '' : ', right-click for a new tab here'}`}
-              className="tab"
+              className={`tab ${dragId === p.id ? 'dragging' : ''} ${dropAt?.id === p.id ? (dropAt.after ? 'drop-after' : 'drop-before') : ''}`}
+              draggable={editing !== p.id}
+              onDragStart={(e) => {
+                e.dataTransfer.effectAllowed = 'move'
+                e.dataTransfer.setData('text/plain', p.id)
+                setDragId(p.id)
+              }}
+              onDragOver={(e) => {
+                if (!dragId) return
+                e.preventDefault()
+                const r = e.currentTarget.getBoundingClientRect()
+                setDropAt({ id: p.id, after: e.clientX > r.left + r.width / 2 })
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                if (dragId && dropAt) moveTab(dragId, dropAt.id, dropAt.after)
+                setDragId(null)
+                setDropAt(null)
+              }}
+              onDragEnd={() => {
+                setDragId(null)
+                setDropAt(null)
+              }}
               onClick={() => update({ activeProjectId: p.id })}
               onDoubleClick={() => startRename(p)}
               onContextMenu={(e) => {
@@ -89,7 +141,7 @@ Double-click or F2 to rename${p.ssh ? '' : ', right-click for a new tab here'}`}
                 if (e.key === 'F2') startRename(p)
                 else if (e.key === 'Enter' || e.key === ' ') update({ activeProjectId: p.id })
               }}
-              onAuxClick={(e) => e.button === 1 && closeProject(p)}
+              onAuxClick={(e) => e.button === 1 && requestClose(p)}
             >
               {p.ssh ? <SshDot id={p.id} /> : active && <span className="dot" />}
               {p.ssh && <HostChip />}
@@ -131,15 +183,17 @@ Double-click or F2 to rename${p.ssh ? '' : ', right-click for a new tab here'}`}
                 </span>
               )}
               <span
-                className="close"
+                className={`close ${armed === p.id ? 'armed' : ''}`}
                 role="button"
-                aria-label={`Close ${p.name}`}
+                aria-label={armed === p.id ? `Confirm close ${p.name}` : `Close ${p.name}`}
+                title={armed === p.id ? 'Click again to close this tab' : 'Close tab'}
                 onClick={(e) => {
                   e.stopPropagation()
-                  closeProject(p)
+                  requestClose(p)
                 }}
+                onMouseLeave={() => armed === p.id && setArmed(null)}
               >
-                <CloseIcon />
+                {armed === p.id ? 'Close?' : <CloseIcon />}
               </span>
             </div>
           )
@@ -160,10 +214,28 @@ Double-click or F2 to rename${p.ssh ? '' : ', right-click for a new tab here'}`}
         <button className="icon-btn" aria-label="Open project" title="Open project folder" onClick={openProject}>
           <PlusIcon />
         </button>
+        <button
+          className="icon-btn"
+          aria-label="Tab profiles"
+          aria-expanded={profilesOpen}
+          title={
+            settings.profiles.find((x) => x.id === settings.activeProfileId)
+              ? `Profile: ${settings.profiles.find((x) => x.id === settings.activeProfileId)?.name}`
+              : 'Tab profiles'
+          }
+          onClick={() => setProfilesOpen((o) => !o)}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
+            <path d="M7 2 12.5 5 7 8 1.5 5z" />
+            <path d="M1.5 8 7 11l5.5-3" strokeLinecap="round" />
+          </svg>
+        </button>
         <button className="icon-btn" aria-label="Open SSH session" title="Open over SSH" onClick={onOpenHosts}>
           <RemoteIcon />
         </button>
       </div>
+
+      {profilesOpen && <ProfileMenu onClose={() => setProfilesOpen(false)} />}
 
       <div className="spacer" />
 

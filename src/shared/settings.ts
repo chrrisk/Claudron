@@ -18,6 +18,14 @@ export interface Project {
   sessionId?: string
 }
 
+/** A named set of tabs. The active profile follows the open tabs automatically. */
+export interface Profile {
+  id: string
+  name: string
+  projects: Project[]
+  activeProjectId: string | null
+}
+
 export interface Settings {
   theme: Theme
   mode: InterfaceMode
@@ -32,6 +40,8 @@ export interface Settings {
   unleashedWarned: boolean
   projects: Project[]
   activeProjectId: string | null
+  profiles: Profile[]
+  activeProfileId: string | null
   /** Spotify app client id (PKCE, no secret). Empty uses the build-time default, if any. */
   spotifyClientId: string
   sshHosts: SshHost[]
@@ -60,6 +70,8 @@ export const DEFAULT_SETTINGS: Settings = {
   unleashedWarned: false,
   projects: [],
   activeProjectId: null,
+  profiles: [],
+  activeProfileId: null,
   spotifyClientId: '',
   sshHosts: [],
   sshKeepalive: true,

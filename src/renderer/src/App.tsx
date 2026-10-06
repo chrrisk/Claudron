@@ -56,6 +56,17 @@ export function App(): React.JSX.Element {
     })()
   }, [settings.projects])
 
+  // The active profile follows the open tabs.
+  useEffect(() => {
+    const { activeProfileId, profiles, projects, activeProjectId } = settings
+    const cur = profiles.find((p) => p.id === activeProfileId)
+    if (!cur) return
+    if (JSON.stringify(cur.projects) === JSON.stringify(projects) && cur.activeProjectId === activeProjectId) return
+    useSettings
+      .getState()
+      .update({ profiles: profiles.map((p) => (p.id === cur.id ? { ...p, projects, activeProjectId } : p)) })
+  }, [settings])
+
   const effectiveMode = project?.ssh ? 'cli' : settings.mode
 
   return (

@@ -41,6 +41,16 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
     update({ projects: [...settings.projects, project], activeProjectId: project.id })
   }
 
+  const duplicate = (p: Project): void => {
+    if (p.ssh) return
+    const base = p.name.replace(/ \d+$/, '')
+    const taken = new Set(settings.projects.map((x) => x.name))
+    let n = 2
+    while (taken.has(`${base} ${n}`)) n++
+    const copy: Project = { id: crypto.randomUUID(), name: `${base} ${n}`, path: p.path }
+    update({ projects: [...settings.projects, copy], activeProjectId: copy.id })
+  }
+
   const closeProject = (p: Project): void => {
     const projects = settings.projects.filter((x) => x.id !== p.id)
     const activeProjectId =
@@ -65,10 +75,14 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
               tabIndex={0}
               aria-selected={active}
               title={`${p.path}
-Double-click to rename`}
+Double-click to rename${p.ssh ? '' : ', right-click for a new tab here'}`}
               className="tab"
               onClick={() => update({ activeProjectId: p.id })}
               onDoubleClick={() => startRename(p)}
+              onContextMenu={(e) => {
+                e.preventDefault()
+                duplicate(p)
+              }}
               onKeyDown={(e) => {
                 if (editing === p.id) return
                 if (e.key === 'F2') startRename(p)
@@ -113,6 +127,19 @@ Double-click to rename`}
             </div>
           )
         })}
+        {activeProject && !activeProject.ssh && (
+          <button
+            className="icon-btn"
+            aria-label="New tab in this folder"
+            title="New tab in this folder"
+            onClick={() => duplicate(activeProject)}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+              <rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1.5" />
+              <path d="M9.5 2.5H3.5a1 1 0 0 0-1 1v6" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
         <button className="icon-btn" aria-label="Open project" title="Open project folder" onClick={openProject}>
           <PlusIcon />
         </button>

@@ -171,7 +171,7 @@
 /* idle decor: tea lights and a mini pumpkin, kept to the margins */
 .glow {
   position: absolute;
-  z-index: 0;
+  z-index: 2;
   pointer-events: none;
 }
 .glow.tea {
@@ -203,5 +203,5 @@
   filter: drop-shadow(0 0 5px color-mix(in srgb, var(--ssh-pumpkin) 60%, transparent));
 }
 .tl-a { left: 7px; bottom: 44px; }
-.tl-b { right: 14px; top: 12px; }
-.pk-a { right: 16px; bottom: 44px; }
+.tl-b { right: 30px; top: 16px; }
+.pk-a { right: 30px; bottom: 44px; }

@@ -76,7 +76,7 @@ export function TitleBar({ settingsOpen, onToggleSettings, onOpenHosts, rightSlo
               tabIndex={0}
               aria-selected={active}
               title={`${p.path}
-Double-click to rename${p.ssh ? '' : ', right-click for a new tab here'}`}
+Double-click or F2 to rename${p.ssh ? '' : ', right-click for a new tab here'}`}
               className="tab"
               onClick={() => update({ activeProjectId: p.id })}
               onDoubleClick={() => startRename(p)}
@@ -113,6 +113,22 @@ Double-click to rename${p.ssh ? '' : ', right-click for a new tab here'}`}
                 />
               ) : (
                 <span className="label">{p.name}</span>
+              )}
+              {editing !== p.id && (
+                <span
+                  className="close edit"
+                  role="button"
+                  aria-label={`Rename ${p.name}`}
+                  title="Rename tab"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    startRename(p)
+                  }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M8.5 1.8l1.7 1.7L4 9.7 1.8 10.2l.5-2.2z" />
+                  </svg>
+                </span>
               )}
               <span
                 className="close"

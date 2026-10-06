@@ -46,8 +46,8 @@ The builds are not code signed yet. On macOS, if Gatekeeper says the app is dama
 ### Build it yourself
 
 ```sh
-git clone https://github.com/chrrisk/spooky-CLI.git
-cd spooky-CLI
+git clone https://github.com/chrrisk/Claudron.git
+cd Claudron
 npm install
 npm run dev
 ```

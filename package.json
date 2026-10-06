@@ -46,9 +46,9 @@
     "vitest": "^4.1.11",
     "zustand": "^5.0.15"
   },
-  "homepage": "https://github.com/chrrisk/spooky-CLI",
+  "homepage": "https://github.com/chrrisk/Claudron",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrrisk/spooky-CLI.git"
+    "url": "https://github.com/chrrisk/Claudron.git"
   }
 }
